@@ -1,0 +1,70 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.3'  // Последняя стабильная версия на данный момент
+	id 'io.spring.dependency-management' version '1.1.7'  // Обновлено для совместимости
+	id 'nu.studer.jooq' version '9.0'  // Обновлено до последней версии
+}
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)  // Spring Boot 3.4.x рекомендует Java 21
+	}
+}
+repositories {
+	mavenCentral()
+}
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-jooq'
+	jooqGenerator "org.postgresql:postgresql:42.7.5"  // Указана явная версия
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	runtimeOnly 'org.postgresql:postgresql:42.7.5'  // Обновленная версия драйвера
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+jooq {
+	version = "3.19.18"  // Обновлено до совместимой версии
+	configurations {
+		main {
+			generationTool {
+				logging = 'WARN'
+				jdbc {
+					driver = 'org.postgresql.Driver'
+					url = "jdbc:postgresql://localhost:5432/postgres"
+					user = "postgres"
+					password = "1234"
+				}
+				generator {
+					name = 'org.jooq.codegen.JavaGenerator'
+					database {
+						name = 'org.jooq.meta.postgres.PostgresDatabase'
+						includes = '.*'
+						excludes = '^(Fly|XFly).*'
+						schemata {
+							schema {
+								inputSchema = "purchase"
+							}
+						}
+					}
+					target {
+						packageName = 'com.example.jooq'
+						directory = 'src/main/generated-jooq'
+					}
+					generate {
+						newline = '\\r\\n'
+						javaTimeTypes = true
+						records = true
+						relations = true
+						daos = false
+						deprecated = false
+						instanceFields = true
+					}
+					strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
+				}
+			}
+		}
+	}
+}
+tasks.named('test') {
+	useJUnitPlatform()
+}
