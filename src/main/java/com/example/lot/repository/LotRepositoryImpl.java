@@ -4,12 +4,14 @@ import com.example.jooq.tables.records.LotRecord;
 import com.example.lot.dto.LotDTO;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.jooq.tables.Lot.LOT;
 
+@Repository
 public class LotRepositoryImpl implements LotRepository{
     @Autowired
     private DSLContext dslContext;
