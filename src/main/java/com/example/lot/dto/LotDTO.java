@@ -1,9 +1,12 @@
 package com.example.lot.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class LotDTO {
+    @NotBlank(message = "Поле lotName не заполнено")
     private final String lotName;
     private final String customerCode;
     private final BigDecimal price;

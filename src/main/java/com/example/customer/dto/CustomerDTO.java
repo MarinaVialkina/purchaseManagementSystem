@@ -1,17 +1,23 @@
 package com.example.customer.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 
 public class CustomerDTO {
-    private final String customerCode;
-    private final String customerName;
-    private final String customerInn;
-    private final String customerKpp;
-    private final String customerLegalAddress;
-    private final String customerPostalAddress;
-    private final String customerEmail;
-    private final String customerCodeMain;
-    private final boolean isOrganization;
-    private final boolean isPerson;
+    @NotBlank(message = "Поле  customerCode не заполнено")
+    private String customerCode;
+    private String customerName;
+    private String customerInn;
+    private String customerKpp;
+    private String customerLegalAddress;
+    private String customerPostalAddress;
+    private String customerEmail;
+    private String customerCodeMain;
+    private boolean isOrganization;
+    private boolean isPerson;
+
+    public CustomerDTO() {
+    }
 
     public CustomerDTO(String customerCode, String customerName, String customerInn, String customerKpp,
                        String customerLegalAddress, String customerPostalAddress, String customerEmail,

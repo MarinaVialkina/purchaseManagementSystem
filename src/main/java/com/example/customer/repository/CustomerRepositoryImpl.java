@@ -1,9 +1,16 @@
 package com.example.customer.repository;
 
 import com.example.customer.dto.CustomerDTO;
+import com.example.customer.dto.request.CustomerFilterRequest;
 import com.example.jooq.tables.records.CustomerRecord;
-import org.jooq.DSLContext;
+import org.jooq.*;
+import org.jooq.Record;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -11,10 +18,12 @@ import java.util.List;
 
 import static com.example.jooq.tables.Customer.CUSTOMER;
 
+
 @Repository
 public class CustomerRepositoryImpl implements CustomerRepository{
     @Autowired
     private DSLContext dslContext;
+
     @Override
     public void addRecord(CustomerDTO newCustomer) {
         dslContext.insertInto(CUSTOMER)
@@ -88,5 +97,107 @@ public class CustomerRepositoryImpl implements CustomerRepository{
                     customerRecord.getIsPerson()));
         }
         return allCustomerDTO;
+    }
+
+    @Override
+    public Page<CustomerDTO> getAllRecordsWithFilter(CustomerFilterRequest filter, Pageable pageable) {
+        Condition condition = DSL.noCondition();
+
+        if (filter != null){
+            if (filter.getCustomerCode() != null && !filter.getCustomerCode().isEmpty() ){
+                condition = condition.and((SQL) CUSTOMER.CUSTOMER_CODE).likeIgnoreCase("%"+filter.getCustomerCode()+"%");
+            }
+            if (filter.getCustomerName() != null && !filter.getCustomerName().isEmpty() ){
+                condition = condition.and((SQL) CUSTOMER.CUSTOMER_NAME).likeIgnoreCase("%"+filter.getCustomerName()+"%");
+            }
+            if (filter.getCustomerInn() != null && !filter.getCustomerInn().isEmpty() ){
+                condition = condition.and((SQL) CUSTOMER.CUSTOMER_INN).likeIgnoreCase("%"+filter.getCustomerInn()+"%");
+            }
+            if (filter.getCustomerKpp() != null && !filter.getCustomerKpp().isEmpty() ){
+                condition = condition.and((SQL) CUSTOMER.CUSTOMER_KPP).likeIgnoreCase("%"+filter.getCustomerKpp()+"%");
+            }
+            if (filter.getCustomerLegalAddress() != null && !filter.getCustomerLegalAddress().isEmpty() ){
+                condition = condition.and((SQL) CUSTOMER.CUSTOMER_LEGAL_ADDRESS).likeIgnoreCase("%"+filter.getCustomerLegalAddress()+"%");
+            }
+            if (filter.getCustomerPostalAddress() != null && !filter.getCustomerPostalAddress().isEmpty() ){
+                condition = condition.and((SQL) CUSTOMER.CUSTOMER_POSTAL_ADDRESS).likeIgnoreCase("%"+filter.getCustomerPostalAddress()+"%");
+            }
+            if (filter.getCustomerEmail() != null && !filter.getCustomerEmail().isEmpty() ){
+                condition = condition.and((SQL) CUSTOMER.CUSTOMER_EMAIL).likeIgnoreCase("%"+filter.getCustomerEmail()+"%");
+            }
+            if (filter.getCustomerCodeMain() != null && !filter.getCustomerCodeMain().isEmpty() ){
+                condition = condition.and((SQL) CUSTOMER.CUSTOMER_CODE_MAIN).likeIgnoreCase("%"+filter.getCustomerCodeMain()+"%");
+            }
+            if (filter.isOrganization() != null ){
+                condition = condition.and((SQL) CUSTOMER.IS_ORGANIZATION).likeIgnoreCase("%"+filter.isOrganization()+"%");
+            }
+            if (filter.isPerson() != null ){
+                condition = condition.and((SQL) CUSTOMER.IS_PERSON).likeIgnoreCase("%"+filter.isPerson()+"%");
+            }
+        }
+        SortField<?>[] sortFields = getSortFields(pageable);
+
+        int totalNumberOfRecords = dslContext.selectCount()
+                .from(CUSTOMER)
+                .where(condition)
+                .fetchOne(0, int.class);
+
+        List<CustomerDTO> content = dslContext.selectFrom(CUSTOMER)
+                .where(condition)
+                .orderBy(sortFields)
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch(this::mapToDTO);
+
+        return new PageImpl<>(content,pageable,totalNumberOfRecords);
+    }
+
+    private SortField<?>[] getSortFields(Pageable pageable){
+        List<SortField<?>> sortFields = new ArrayList<>();
+        if(pageable.getSort() != null){
+            pageable.getSort().forEach(order -> {
+                Field<?> field = getField(order.getProperty());
+                if (field != null) {
+                    sortFields.add(order.isAscending() ? field.asc() : field.desc());
+                }
+            });
+        }
+
+        if (sortFields.isEmpty()){
+            sortFields.add(CUSTOMER.CUSTOMER_CODE.asc());
+        }
+
+        return sortFields.toArray(new SortField<?>[0]);
+    }
+
+    private Field<?> getField(String propertyName){
+        return switch (propertyName) {
+            case "customerCode" -> CUSTOMER.CUSTOMER_CODE;
+            case "customerName" -> CUSTOMER.CUSTOMER_NAME;
+            case "customerInn" -> CUSTOMER.CUSTOMER_INN;
+            case "customerKpp" -> CUSTOMER.CUSTOMER_KPP;
+            case "customerLegalAddress" -> CUSTOMER.CUSTOMER_LEGAL_ADDRESS;
+            case "customerPostalAddress" -> CUSTOMER.CUSTOMER_POSTAL_ADDRESS;
+            case "customerEmail" -> CUSTOMER.CUSTOMER_EMAIL;
+            case "customerCodeMain" -> CUSTOMER.CUSTOMER_CODE_MAIN;
+            case "isOrganization" -> CUSTOMER.IS_ORGANIZATION;
+            case "isPerson" -> CUSTOMER.IS_PERSON;
+            default -> null;
+        };
+    }
+
+    private CustomerDTO mapToDTO(Record record) {
+        return new CustomerDTO(
+                record.get(CUSTOMER.CUSTOMER_CODE),
+                record.get(CUSTOMER.CUSTOMER_NAME),
+                record.get(CUSTOMER.CUSTOMER_INN),
+                record.get(CUSTOMER.CUSTOMER_KPP),
+                record.get(CUSTOMER.CUSTOMER_LEGAL_ADDRESS),
+                record.get(CUSTOMER.CUSTOMER_POSTAL_ADDRESS),
+                record.get(CUSTOMER.CUSTOMER_EMAIL),
+                record.get(CUSTOMER.CUSTOMER_CODE_MAIN),
+                record.get(CUSTOMER.IS_ORGANIZATION),
+                record.get(CUSTOMER.IS_PERSON)
+        );
     }
 }

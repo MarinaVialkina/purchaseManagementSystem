@@ -2,15 +2,13 @@ package com.example.lot.service;
 
 import com.example.lot.dto.LotDTO;
 import com.example.lot.repository.LotRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LotServiceImpl implements LotService{
-    private final LotRepository lotRepository;
-
-    public LotServiceImpl(LotRepository lotRepository) {
-        this.lotRepository = lotRepository;
-    }
+    @Autowired
+    LotRepository lotRepository;
 
     @Override
     public void addLot(LotDTO newLot) {

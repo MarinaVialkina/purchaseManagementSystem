@@ -1,9 +1,16 @@
 package com.example.customer.service;
 
 import com.example.customer.dto.CustomerDTO;
+import com.example.customer.dto.request.CustomerFilterRequest;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 
 public interface CustomerService {
-    void addCustomer(CustomerDTO newCustomer);
+    CustomerDTO addCustomer(CustomerDTO newCustomer);
     void deleteCustomer(String customerCode);
-    void updateCustomer(CustomerDTO updatedCustomer);
+    CustomerDTO updateCustomer(CustomerDTO updatedCustomer);
+
+    Page<CustomerDTO> getListOfCustomers(CustomerFilterRequest customerFilter, Pageable pageable);
 }

@@ -1,24 +1,31 @@
 package com.example.customer.service;
 
 import com.example.customer.dto.CustomerDTO;
+import com.example.customer.dto.request.CustomerFilterRequest;
 import com.example.customer.repository.CustomerRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
+
+
 
 @Service
 public class CustomerServiceImpl implements CustomerService{
-    private final CustomerRepository customerRepository;
-
-    public CustomerServiceImpl(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
+    @Autowired
+    CustomerRepository customerRepository;
 
     @Override
-    public void addCustomer(CustomerDTO newCustomer) {
-        if (customerRepository.getRecord(newCustomer.getCustomerCode()) != null){
+    public CustomerDTO addCustomer(CustomerDTO newCustomer) {
+        CustomerDTO existingCustomer = customerRepository.getRecord(newCustomer.getCustomerCode());
+        if (existingCustomer == null){
             customerRepository.addRecord(newCustomer);
         }else{
-            System.out.println("Код customer занят");
+            throw new IllegalArgumentException("Customer с кодом " + newCustomer.getCustomerCode() + " уже существует");
         }
+        return customerRepository.getRecord(newCustomer.getCustomerCode());
+
     }
 
     @Override
@@ -27,11 +34,19 @@ public class CustomerServiceImpl implements CustomerService{
     }
 
     @Override
-    public void updateCustomer(CustomerDTO updatedCustomer) {
-        if (customerRepository.getRecord(updatedCustomer.getCustomerCode())!= null){
+    public CustomerDTO updateCustomer(CustomerDTO updatedCustomer) {
+        CustomerDTO existingCustomer = customerRepository.getRecord(updatedCustomer.getCustomerCode());
+        if (existingCustomer != null){
             customerRepository.updateRecord(updatedCustomer);
         }else {
-            System.out.println("Customer с таким кодом не найден");
+            throw new IllegalArgumentException("Customer с кодом " + updatedCustomer.getCustomerCode() + " не найден");
         }
+        return customerRepository.getRecord(updatedCustomer.getCustomerCode());
+    }
+
+
+    @Override
+    public Page<CustomerDTO> getListOfCustomers(CustomerFilterRequest customerFilter, Pageable pageable) {
+        return customerRepository.getAllRecordsWithFilter(customerFilter, pageable);
     }
 }

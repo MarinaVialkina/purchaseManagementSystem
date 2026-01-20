@@ -1,6 +1,5 @@
 package com.example.lot.repository;
 
-import com.example.customer.dto.CustomerDTO;
 import com.example.lot.dto.LotDTO;
 
 import java.util.List;
