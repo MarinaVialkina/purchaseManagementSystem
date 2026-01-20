@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 
-
 @RestController
 @RequestMapping("api/customers")
 public class CustomerController {
@@ -30,12 +29,12 @@ public class CustomerController {
 
     @PutMapping("/{customerCode}")
     public CustomerDTO updateCustomer(@PathVariable String customerCode, @RequestBody CustomerDTO updatedCustomer){
-        return customerService.updateCustomer(updatedCustomer);
+        return customerService.updateCustomer(customerCode, updatedCustomer);
     }
 
     @GetMapping("")
     public Page<CustomerDTO> getListOfCustomers(
             @ModelAttribute CustomerFilterRequest customerFilter, Pageable pageable){
-        customerService.getListOfCustomers(customerFilter, pageable);
+        return customerService.getListOfCustomers(customerFilter, pageable);
     }
 }

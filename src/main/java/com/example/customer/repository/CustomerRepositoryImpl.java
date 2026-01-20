@@ -81,58 +81,39 @@ public class CustomerRepositoryImpl implements CustomerRepository{
     }
 
     @Override
-    public List<CustomerDTO> getAllRecord() {
-        List<CustomerRecord> customerRecords = dslContext.selectFrom(CUSTOMER).fetch();
-        List<CustomerDTO> allCustomerDTO = new ArrayList<>();
-        for (CustomerRecord customerRecord : customerRecords){
-            allCustomerDTO.add(new CustomerDTO(customerRecord.getCustomerCode(),
-                    customerRecord.getCustomerName(),
-                    customerRecord.getCustomerInn(),
-                    customerRecord.getCustomerKpp(),
-                    customerRecord.getCustomerLegalAddress(),
-                    customerRecord.getCustomerPostalAddress(),
-                    customerRecord.getCustomerEmail(),
-                    customerRecord.getCustomerCodeMain(),
-                    customerRecord.getIsOrganization(),
-                    customerRecord.getIsPerson()));
-        }
-        return allCustomerDTO;
-    }
-
-    @Override
     public Page<CustomerDTO> getAllRecordsWithFilter(CustomerFilterRequest filter, Pageable pageable) {
         Condition condition = DSL.noCondition();
 
         if (filter != null){
             if (filter.getCustomerCode() != null && !filter.getCustomerCode().isEmpty() ){
-                condition = condition.and((SQL) CUSTOMER.CUSTOMER_CODE).likeIgnoreCase("%"+filter.getCustomerCode()+"%");
+                condition = condition.and(CUSTOMER.CUSTOMER_CODE.eq(filter.getCustomerCode()));
             }
             if (filter.getCustomerName() != null && !filter.getCustomerName().isEmpty() ){
-                condition = condition.and((SQL) CUSTOMER.CUSTOMER_NAME).likeIgnoreCase("%"+filter.getCustomerName()+"%");
+                condition = condition.and(CUSTOMER.CUSTOMER_NAME.likeIgnoreCase("%"+filter.getCustomerName()+"%"));
             }
             if (filter.getCustomerInn() != null && !filter.getCustomerInn().isEmpty() ){
-                condition = condition.and((SQL) CUSTOMER.CUSTOMER_INN).likeIgnoreCase("%"+filter.getCustomerInn()+"%");
+                condition = condition.and(CUSTOMER.CUSTOMER_INN.eq(filter.getCustomerInn()));
             }
             if (filter.getCustomerKpp() != null && !filter.getCustomerKpp().isEmpty() ){
-                condition = condition.and((SQL) CUSTOMER.CUSTOMER_KPP).likeIgnoreCase("%"+filter.getCustomerKpp()+"%");
+                condition = condition.and(CUSTOMER.CUSTOMER_KPP.eq(filter.getCustomerKpp()));
             }
             if (filter.getCustomerLegalAddress() != null && !filter.getCustomerLegalAddress().isEmpty() ){
-                condition = condition.and((SQL) CUSTOMER.CUSTOMER_LEGAL_ADDRESS).likeIgnoreCase("%"+filter.getCustomerLegalAddress()+"%");
+                condition = condition.and(CUSTOMER.CUSTOMER_LEGAL_ADDRESS.likeIgnoreCase("%"+filter.getCustomerLegalAddress()+"%"));
             }
             if (filter.getCustomerPostalAddress() != null && !filter.getCustomerPostalAddress().isEmpty() ){
-                condition = condition.and((SQL) CUSTOMER.CUSTOMER_POSTAL_ADDRESS).likeIgnoreCase("%"+filter.getCustomerPostalAddress()+"%");
+                condition = condition.and(CUSTOMER.CUSTOMER_POSTAL_ADDRESS.likeIgnoreCase("%"+filter.getCustomerPostalAddress()+"%"));
             }
             if (filter.getCustomerEmail() != null && !filter.getCustomerEmail().isEmpty() ){
-                condition = condition.and((SQL) CUSTOMER.CUSTOMER_EMAIL).likeIgnoreCase("%"+filter.getCustomerEmail()+"%");
+                condition = condition.and(CUSTOMER.CUSTOMER_EMAIL.likeIgnoreCase("%"+filter.getCustomerEmail()+"%"));
             }
             if (filter.getCustomerCodeMain() != null && !filter.getCustomerCodeMain().isEmpty() ){
-                condition = condition.and((SQL) CUSTOMER.CUSTOMER_CODE_MAIN).likeIgnoreCase("%"+filter.getCustomerCodeMain()+"%");
+                condition = condition.and(CUSTOMER.CUSTOMER_CODE_MAIN.eq(filter.getCustomerCodeMain()));
             }
             if (filter.isOrganization() != null ){
-                condition = condition.and((SQL) CUSTOMER.IS_ORGANIZATION).likeIgnoreCase("%"+filter.isOrganization()+"%");
+                condition = condition.and(CUSTOMER.IS_ORGANIZATION.eq(filter.isOrganization()));
             }
             if (filter.isPerson() != null ){
-                condition = condition.and((SQL) CUSTOMER.IS_PERSON).likeIgnoreCase("%"+filter.isPerson()+"%");
+                condition = condition.and(CUSTOMER.IS_PERSON.eq(filter.isPerson()));
             }
         }
         SortField<?>[] sortFields = getSortFields(pageable);

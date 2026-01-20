@@ -1,13 +1,16 @@
 package com.example.lot.repository;
 
 import com.example.lot.dto.LotDTO;
+import com.example.lot.dto.request.LotFilterRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 
 public interface LotRepository {
     void addRecord(LotDTO newLot);
     void deleteRecord(String lotName);
     void updateRecord(LotDTO updatedLot);
     LotDTO getRecord(String lotName);
-    List<LotDTO> getAllRecord();
+
+    Page<LotDTO> getAllRecordWithFilter(LotFilterRequest lotFilterRequest, Pageable pageable);
 }

@@ -1,35 +1,54 @@
 package com.example.lot.service;
 
 import com.example.lot.dto.LotDTO;
+import com.example.lot.dto.request.LotFilterRequest;
 import com.example.lot.repository.LotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LotServiceImpl implements LotService{
     @Autowired
     LotRepository lotRepository;
 
+    @Transactional
     @Override
-    public void addLot(LotDTO newLot) {
-        if (lotRepository.getRecord(newLot.getLotName()) != null){
+    public LotDTO addLot(LotDTO newLot) {
+        LotDTO existingLot = lotRepository.getRecord(newLot.getLotName());
+        if (existingLot == null){
             lotRepository.addRecord(newLot);
         }else{
-            System.out.println("Имя lot занят");
+            throw new IllegalArgumentException("Lot с именем " + newLot.getLotName() + " уже существует");
         }
+
+        return lotRepository.getRecord(newLot.getLotName());
     }
 
+    @Transactional
     @Override
     public void deleteLot(String lotName) {
         lotRepository.deleteRecord(lotName);
     }
 
+    @Transactional
     @Override
-    public void updateLot(LotDTO updatedLot) {
-        if (lotRepository.getRecord(updatedLot.getLotName())!= null){
+    public LotDTO updateLot(String lotName, LotDTO updatedLot) {
+        LotDTO existingLot = lotRepository.getRecord(lotName);
+        if (existingLot != null && lotName.equals(updatedLot.getLotName())){
             lotRepository.updateRecord(updatedLot);
         }else {
-            System.out.println("Lot с таким именем не найден");
+            throw new IllegalArgumentException("Lot с именем " + updatedLot.getLotName() + " не найден");
         }
+
+        return lotRepository.getRecord(updatedLot.getLotName());
+    }
+
+    @Transactional
+    @Override
+    public Page<LotDTO> getListOfLots(LotFilterRequest lotFilterRequest, Pageable pageable) {
+        return lotRepository.getAllRecordWithFilter(lotFilterRequest, pageable);
     }
 }

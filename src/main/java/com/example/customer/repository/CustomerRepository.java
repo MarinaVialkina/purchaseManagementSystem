@@ -13,7 +13,6 @@ public interface CustomerRepository {
     void deleteRecord(String customer_code);
     void updateRecord(CustomerDTO updatedCustomer);
     CustomerDTO getRecord(String customer_code);
-    List<CustomerDTO> getAllRecord();
 
     Page<CustomerDTO> getAllRecordsWithFilter(CustomerFilterRequest filter, Pageable pageable);
 }

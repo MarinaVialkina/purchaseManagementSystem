@@ -1,28 +1,23 @@
 package com.example.lot.controller;
 
-import com.example.customer.dto.CustomerDTO;
-import com.example.customer.service.CustomerService;
 import com.example.lot.dto.LotDTO;
+import com.example.lot.dto.request.LotFilterRequest;
 import com.example.lot.service.LotService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/lots")
 public class LotController {
-    private final LotService lotService;
-
-    public LotController(LotService lotService) {
-        this.lotService = lotService;
-    }
+    @Autowired
+    LotService lotService;
 
     @PostMapping
-    public void addLot(String lotName, String customerCode, BigDecimal price, String currencyCode, String ndsRate,
-                       String placeDelivery, LocalDateTime dateDelivery){
-        LotDTO lotDTO = new LotDTO(lotName, customerCode, price, currencyCode, ndsRate, placeDelivery, dateDelivery);
-        lotService.addLot(lotDTO);
+    public LotDTO addLot(@RequestBody LotDTO newLot){
+        return lotService.addLot(newLot);
     }
 
     @DeleteMapping("/{lotName}")
@@ -30,10 +25,14 @@ public class LotController {
         lotService.deleteLot(lotName);
     }
 
-    @PostMapping("/{lotName}")
-    public void updateCustomer(@PathVariable String lotName, String customerCode, BigDecimal price, String currencyCode, String ndsRate,
-                               String placeDelivery, LocalDateTime dateDelivery){
-        LotDTO updatedLot = new LotDTO(lotName, customerCode, price, currencyCode, ndsRate, placeDelivery, dateDelivery);
-        lotService.updateLot(updatedLot);
+    @PutMapping("/{lotName}")
+    public LotDTO updateLot(@PathVariable String lotName, @RequestBody LotDTO updatedLot){
+        return lotService.updateLot(lotName, updatedLot);
+    }
+
+    @GetMapping("")
+    public Page<LotDTO> getListOfLots(
+            @ModelAttribute LotFilterRequest lotFilter, Pageable pageable){
+        return lotService.getListOfLots(lotFilter, pageable);
     }
 }
