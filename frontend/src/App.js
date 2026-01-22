@@ -1,25 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+import {BrowserRouter as Router, Routes, Route, Link} from 'react-router-dom'
+
+import Customers from './Customers'
+import Lots from './Lots'
+
+function App(){
+  return(
+    <Router>
+      <div>
+        <nav style={{backgroundColor: '#333', padding: '10px', marginBottom: '20px'}}>
+          <Link to='/' style={{ color: 'white', marginRight: '15px', textDecoration: 'none' }}> Главная</Link>
+          <Link to='/' style={{ color: 'white', marginRight: '15px', textDecoration: 'none' }}> Контрагенты</Link>
+          <Link to='/' style={{ color: 'white', marginRight: '15px', textDecoration: 'none' }}> Лоты</Link>
+        </nav>
+        <div padding='20px'>
+        <Routes>
+          <Route path="/" element={
+            <div>
+              <h2>Выберете раздел в меню навигации</h2>
+            </div>
+          } />
+          <Route path="/Customers" element={<Customers/>} />
+          <Route path="/Lots" element={<Lots/>} />
+        </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
-
 export default App;
