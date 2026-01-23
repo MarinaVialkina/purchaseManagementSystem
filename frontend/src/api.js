@@ -1,9 +1,7 @@
 import axios from 'axios'
 
-const API_BASE='http://localhost:8081/api'
-
 const api = axios.create({
-    baseURL: API_BASE,
+    baseURL: '/api',
     timeout: 10000,
     headers:{
         'Content-Type': 'application/json'
@@ -21,12 +19,12 @@ export const createCustomer = async (customerData) =>{
 };
 
 export const updateCustomer = async (code, customerData) =>{
-    const response = await api.put('/customers/${code}', customerData);
+    const response = await api.put(`/customers/${code}`, customerData);
     return response.data ;
 };
 
 export const deleteCustomer = async (code) =>{
-    await api.put('/customers/${code}');
+    await api.delete(`/customers/${code}`);
 };
 
 

@@ -26,6 +26,11 @@ public class CustomerRepositoryImpl implements CustomerRepository{
 
     @Override
     public void addRecord(CustomerDTO newCustomer) {
+        String customerCodeMain = newCustomer.getCustomerCodeMain();
+        if (customerCodeMain != null && customerCodeMain.trim().isEmpty()) {
+            customerCodeMain = null;
+        }
+
         dslContext.insertInto(CUSTOMER)
                 .set(CUSTOMER.CUSTOMER_CODE, newCustomer.getCustomerCode())
                 .set(CUSTOMER.CUSTOMER_NAME, newCustomer.getCustomerName())
@@ -34,7 +39,7 @@ public class CustomerRepositoryImpl implements CustomerRepository{
                 .set(CUSTOMER.CUSTOMER_LEGAL_ADDRESS, newCustomer.getCustomerLegalAddress())
                 .set(CUSTOMER.CUSTOMER_POSTAL_ADDRESS, newCustomer.getCustomerPostalAddress())
                 .set(CUSTOMER.CUSTOMER_EMAIL, newCustomer.getCustomerEmail())
-                .set(CUSTOMER.CUSTOMER_CODE_MAIN, newCustomer.getCustomerCodeMain())
+                .set(CUSTOMER.CUSTOMER_CODE_MAIN, customerCodeMain)
                 .set(CUSTOMER.IS_ORGANIZATION, newCustomer.isOrganization())
                 .set(CUSTOMER.IS_PERSON, newCustomer.isPerson())
                 .execute();
@@ -47,6 +52,11 @@ public class CustomerRepositoryImpl implements CustomerRepository{
 
     @Override
     public void updateRecord(CustomerDTO updatedCustomer) {
+        String customerCodeMain = updatedCustomer.getCustomerCodeMain();
+        if (customerCodeMain != null && customerCodeMain.trim().isEmpty()) {
+            customerCodeMain = null;
+        }
+
         dslContext.update(CUSTOMER)
                 .set(CUSTOMER.CUSTOMER_NAME, updatedCustomer.getCustomerName())
                 .set(CUSTOMER.CUSTOMER_INN, updatedCustomer.getCustomerInn())
@@ -54,7 +64,7 @@ public class CustomerRepositoryImpl implements CustomerRepository{
                 .set(CUSTOMER.CUSTOMER_LEGAL_ADDRESS, updatedCustomer.getCustomerLegalAddress())
                 .set(CUSTOMER.CUSTOMER_POSTAL_ADDRESS, updatedCustomer.getCustomerPostalAddress())
                 .set(CUSTOMER.CUSTOMER_EMAIL, updatedCustomer.getCustomerEmail())
-                .set(CUSTOMER.CUSTOMER_CODE_MAIN, updatedCustomer.getCustomerCodeMain())
+                .set(CUSTOMER.CUSTOMER_CODE_MAIN, customerCodeMain) 
                 .set(CUSTOMER.IS_ORGANIZATION, updatedCustomer.isOrganization())
                 .set(CUSTOMER.IS_PERSON, updatedCustomer.isPerson())
                 .where(CUSTOMER.CUSTOMER_CODE.eq(updatedCustomer.getCustomerCode()))
@@ -66,8 +76,9 @@ public class CustomerRepositoryImpl implements CustomerRepository{
         CustomerRecord customerRecord = dslContext.selectFrom(CUSTOMER)
                 .where(CUSTOMER.CUSTOMER_CODE.eq(customer_code))
                 .fetchOne();
-
-        assert customerRecord != null;
+        if (customerRecord == null) {
+            return null;
+        }
         return new CustomerDTO(customerRecord.getCustomerCode(),
                 customerRecord.getCustomerName(),
                 customerRecord.getCustomerInn(),

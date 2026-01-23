@@ -32,6 +32,10 @@ public class CustomerServiceImpl implements CustomerService{
     @Transactional
     @Override
     public void deleteCustomer(String customerCode) {
+        CustomerDTO deletedCustomer = customerRepository.getRecord(customerCode);
+        if (deletedCustomer == null){
+            throw new IllegalArgumentException("Customer с кодом " + customerCode + " не найден");
+        }
         customerRepository.deleteRecord(customerCode);
     }
 

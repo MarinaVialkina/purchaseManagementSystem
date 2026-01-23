@@ -11,8 +11,8 @@ function App(){
       <div>
         <nav style={{backgroundColor: '#333', padding: '10px', marginBottom: '20px'}}>
           <Link to='/' style={{ color: 'white', marginRight: '15px', textDecoration: 'none' }}> Главная</Link>
-          <Link to='/' style={{ color: 'white', marginRight: '15px', textDecoration: 'none' }}> Контрагенты</Link>
-          <Link to='/' style={{ color: 'white', marginRight: '15px', textDecoration: 'none' }}> Лоты</Link>
+          <Link to='/customers' style={{ color: 'white', marginRight: '15px', textDecoration: 'none' }}> Контрагенты</Link>
+          <Link to='/lots' style={{ color: 'white', marginRight: '15px', textDecoration: 'none' }}> Лоты</Link>
         </nav>
         <div padding='20px'>
         <Routes>
@@ -21,8 +21,8 @@ function App(){
               <h2>Выберете раздел в меню навигации</h2>
             </div>
           } />
-          <Route path="/Customers" element={<Customers/>} />
-          <Route path="/Lots" element={<Lots/>} />
+          <Route path="/customers" element={<Customers/>} />
+          <Route path="/lots" element={<Lots/>} />
         </Routes>
         </div>
       </div>
