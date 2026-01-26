@@ -59,7 +59,10 @@ public class LotRepositoryImpl implements LotRepository{
     @Override
     public LotDTO getRecord(String lotName) {
         LotRecord lotRecord = dslContext.selectFrom(LOT).where(LOT.LOT_NAME.eq(lotName)).fetchOne();
-        assert lotRecord != null;
+        if (lotRecord == null){
+            return null;
+        }
+
         return new LotDTO(lotRecord.getLotName(),
                 lotRecord.getCustomerCode(),
                 lotRecord.getPrice(),

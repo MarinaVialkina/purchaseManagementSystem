@@ -40,10 +40,10 @@ export const createLot = async (lotData) =>{
 };
 
 export const updateLot = async (code, lotData) =>{
-    const response = await api.put('/lots/${code}', lotData);
+    const response = await api.put(`/lots/${code}`, lotData);
     return response.data ;
 };
 
 export const deleteLot = async (code) =>{
-    await api.put('/lots/${code}');
+    await api.delete(`/lots/${code}`);
 };
