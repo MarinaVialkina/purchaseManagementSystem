@@ -1,6 +1,7 @@
 package com.example.customer.service;
 
 import com.example.customer.dto.CustomerDTO;
+import com.example.customer.dto.CustomerSimpleDTO;
 import com.example.customer.dto.request.CustomerFilterRequest;
 import com.example.customer.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -56,5 +59,10 @@ public class CustomerServiceImpl implements CustomerService{
     @Override
     public Page<CustomerDTO> getListOfCustomers(CustomerFilterRequest customerFilter, Pageable pageable) {
         return customerRepository.getAllRecordsWithFilter(customerFilter, pageable);
+    }
+
+    @Override
+    public List<CustomerSimpleDTO> getCustomersSimpleList() {
+        return customerRepository.getRecordsSimpleList();
     }
 }

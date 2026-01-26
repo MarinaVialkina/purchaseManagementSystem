@@ -1,6 +1,7 @@
 package com.example.customer.repository;
 
 import com.example.customer.dto.CustomerDTO;
+import com.example.customer.dto.CustomerSimpleDTO;
 import com.example.customer.dto.request.CustomerFilterRequest;
 import com.example.jooq.tables.records.CustomerRecord;
 import org.jooq.*;
@@ -142,6 +143,18 @@ public class CustomerRepositoryImpl implements CustomerRepository{
                 .fetch(this::mapToDTO);
 
         return new PageImpl<>(content,pageable,totalNumberOfRecords);
+    }
+
+    @Override
+    public List<CustomerSimpleDTO> getRecordsSimpleList() {
+        return dslContext.select(CUSTOMER.CUSTOMER_CODE, CUSTOMER.CUSTOMER_NAME)
+                .from(CUSTOMER)
+                .orderBy(CUSTOMER.CUSTOMER_NAME.asc())
+                .fetch()
+                .map(record -> new CustomerSimpleDTO(
+                        record.get(CUSTOMER.CUSTOMER_CODE),
+                        record.get(CUSTOMER.CUSTOMER_NAME)
+                ));
     }
 
     private SortField<?>[] getSortFields(Pageable pageable){

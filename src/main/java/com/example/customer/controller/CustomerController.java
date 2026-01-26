@@ -1,6 +1,7 @@
 package com.example.customer.controller;
 
 import com.example.customer.dto.CustomerDTO;
+import com.example.customer.dto.CustomerSimpleDTO;
 import com.example.customer.dto.request.CustomerFilterRequest;
 import com.example.customer.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -36,5 +39,10 @@ public class CustomerController {
     public Page<CustomerDTO> getListOfCustomers(
             @ModelAttribute CustomerFilterRequest customerFilter, Pageable pageable){
         return customerService.getListOfCustomers(customerFilter, pageable);
+    }
+
+    @GetMapping("/all")
+    public List<CustomerSimpleDTO> getCustomersSimpleList(){
+        return customerService.getCustomersSimpleList();
     }
 }

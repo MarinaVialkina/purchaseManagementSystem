@@ -1,15 +1,17 @@
 import React, {useState, useEffect} from "react";
 
-import { getLots, createLot, deleteLot, updateLot } from "./api";
+import { getLots, createLot, deleteLot, updateLot, getCustomerSimpleList } from "./api";
 
 function Lots(){
     const [lots, setLots] = useState([]);
+    const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingCustomers, setLoadingCustomers] = useState(false);
 
     const [newLot, setNewLot] = useState({
         lotName: "",
         customerCode: "",
-        price: "0",
+        price: "",
         currencyCode: "RUB",
         ndsRate: "Без НДС",
         placeDelivery: "",
@@ -40,6 +42,7 @@ function Lots(){
 
     useEffect(() => {
         loadLots();
+        loadCustomers();
     }, []);
 
 
@@ -72,6 +75,19 @@ function Lots(){
         }
     };
 
+    const loadCustomers = async() =>{
+        setLoadingCustomers(true);
+        try {
+            const data = await getCustomerSimpleList();
+            setCustomers(data);
+        } catch (error) {
+            console.error('Ошибка загрузки контрагентов:', error);
+            alert('Ошибка загрузки списка контрагентов');
+        }finally{
+            setLoadingCustomers(false);
+        }
+    };
+
     const handleCreate = async() => {
         if (!newLot.lotName && !newLot.customerCode){
             alert('Необходимо заполнить обязательные поля: Наименование и Код контрагента');
@@ -95,7 +111,7 @@ function Lots(){
             setNewLot({
                 lotName: "",
                 customerCode: "",
-                price: "0",
+                price: "",
                 currencyCode: "RUB",
                 ndsRate: "Без НДС",
                 placeDelivery: "",
@@ -246,23 +262,30 @@ function Lots(){
                 })}
                 style={{marginRight: "10px", padding: "5px"}}
             />
-
-            <input 
-                placeholder="Код контрагента"
+            <select 
                 value={newLot.customerCode}
                 onChange={e => setNewLot({
                     ...newLot, 
                     customerCode: e.target.value
                 })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
+                style={{padding: "5px", minWidth: "200px"}}
+                disabled={loadingCustomers}
+            >
+                <option value="">Выберите контрагента</option>
+                {customers.map(customer => (
+                    <option key={customer.customerCode} value={customer.customerCode}>
+                        {customer.customerName} ({customer.customerCode})
+                    </option>
+                ))}
+            </select>
+            {loadingCustomers && <span style={{marginLeft: "10px"}}>Загрузка...</span>}
+        
             <input 
                 placeholder="Начальная стоимость"
                 type="number"
                 min="0"
                 step="0.01"
-                value={newLot.price}
+                
                 onChange={e => setNewLot({
                     ...newLot, 
                     price: e.target.value
@@ -353,15 +376,22 @@ function Lots(){
                             disabled
                             style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
                         />
-                        <input 
-                            placeholder="Код контрагента"
+                        <select 
                             value={editingLot.customerCode}
                             onChange={e => setEditingLot({
                                 ...editingLot, 
                                 customerCode: e.target.value
                             })}
-                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
-                        />
+                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "10px"}}
+                            disabled={loadingCustomers}
+                        >
+                            <option value="">Выберите контрагента</option>
+                            {customers.map(customer => (
+                                <option key={customer.customerCode} value={customer.customerCode}>
+                                    {customer.customerName} ({customer.customerCode})
+                                </option>
+                            ))}
+                        </select>
 
                         <input 
                             placeholder="Начальная стоимость"
@@ -452,15 +482,22 @@ function Lots(){
                 style={{marginRight: "10px", padding: "5px"}}
             />
 
-            <input 
-                placeholder="Фильтр по коду контрагента"
-                value={filter.customerCode}
-                onChange={e => setFilter({
-                    ...filter, 
-                    customerCode: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
+            <select 
+                    value={filter.customerCode}
+                    onChange={e => setFilter({
+                        ...filter, 
+                        customerCode: e.target.value
+                    })}
+                    style={{marginRight: "10px", padding: "5px", marginBottom: "5px"}}
+                    disabled={loadingCustomers}
+                >
+                    <option value="">Все контрагенты</option>
+                    {customers.map(customer => (
+                        <option key={customer.customerCode} value={customer.customerCode}>
+                            {customer.customerCode}
+                        </option>
+                    ))}
+                </select>
 
             <input 
                 placeholder="Мин. начальная стоимость"
@@ -588,10 +625,16 @@ function Lots(){
                             </td>
                         </tr>
                     ) : (
-                        lots.map(lot =>(
-                            <tr key={lot.lotName}>
+                        lots.map(lot =>{
+                            const customer = customers.find(c => c.customerCode === lot.customerCode);
+
+                            const customerDisplay = customer ? 
+                                    `${customer.customerName} (${customer.customerCode})` : 
+                                    lot.customerCode;
+
+                            return(<tr key={lot.lotName}>
                                 <td style={{padding: "10px"}}>{lot.lotName}</td>
-                                <td style={{padding: "10px"}}>{lot.customerCode}</td>
+                                <td style={{padding: "10px"}}>{customerDisplay}</td>
                                 <td style={{padding: "10px"}}>{lot.price}</td>
                                 <td style={{padding: "10px"}}>{lot.currencyCode}</td>
                                 <td style={{padding: "10px"}}>{lot.ndsRate}</td>
@@ -611,8 +654,8 @@ function Lots(){
                                     <div><button onClick={() => handleDelete(lot.lotName)}>Удалить</button></div>
                                     <div><button onClick={() => startEdit(lot)}>Обновить</button></div>
                                 </td>
-                            </tr>
-                        ))
+                            </tr>)
+                        })
                     )}
                 </tbody>
             </table>

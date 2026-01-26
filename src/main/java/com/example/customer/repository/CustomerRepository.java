@@ -1,6 +1,7 @@
 package com.example.customer.repository;
 
 import com.example.customer.dto.CustomerDTO;
+import com.example.customer.dto.CustomerSimpleDTO;
 import com.example.customer.dto.request.CustomerFilterRequest;
 
 import org.springframework.data.domain.Page;
@@ -15,4 +16,5 @@ public interface CustomerRepository {
     CustomerDTO getRecord(String customer_code);
 
     Page<CustomerDTO> getAllRecordsWithFilter(CustomerFilterRequest filter, Pageable pageable);
+    List<CustomerSimpleDTO> getRecordsSimpleList();
 }
