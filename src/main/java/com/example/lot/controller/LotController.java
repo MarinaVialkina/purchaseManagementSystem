@@ -3,6 +3,7 @@ package com.example.lot.controller;
 import com.example.lot.dto.LotDTO;
 import com.example.lot.dto.request.LotFilterRequest;
 import com.example.lot.service.LotService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +17,7 @@ public class LotController {
     LotService lotService;
 
     @PostMapping
-    public LotDTO addLot(@RequestBody LotDTO newLot) {
+    public LotDTO addLot(@RequestBody @Valid LotDTO newLot) {
         return lotService.addLot(newLot);
     }
 

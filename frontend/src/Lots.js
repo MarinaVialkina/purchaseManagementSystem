@@ -4,8 +4,9 @@ import { getLots, createLot, deleteLot, updateLot, getCustomerSimpleList } from 
 
 function Lots() {
     const [lots, setLots] = useState([]);
-    const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [customers, setCustomers] = useState([]);
     const [loadingCustomers, setLoadingCustomers] = useState(false);
 
     const [newLot, setNewLot] = useState({
@@ -120,8 +121,7 @@ function Lots() {
 
             loadLots();
         } catch (error) {
-            console.error("Ошибка создания лота:", error);
-            alert('Ошибка создания лота: ' + (error.response?.data?.message || error.message));
+            alert(`Ошибка создания лота:\n${error.message} `);
         }
     };
 
@@ -564,8 +564,8 @@ function Lots() {
                 />
 
                 <input
-                    type="datetime-local"
                     placeholder="Дата доставки с"
+                    type="datetime-local"
                     value={filter.dateDeliveryFrom}
                     onChange={e => setFilter({
                         ...filter,
@@ -575,8 +575,8 @@ function Lots() {
                 />
 
                 <input
-                    type="datetime-local"
                     placeholder="Дата доставки по"
+                    type="datetime-local"
                     value={filter.dateDeliveryTo}
                     onChange={e => setFilter({
                         ...filter,

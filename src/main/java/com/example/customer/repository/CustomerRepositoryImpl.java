@@ -55,7 +55,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
                 .set(CUSTOMER.CUSTOMER_LEGAL_ADDRESS, updatedCustomer.getCustomerLegalAddress())
                 .set(CUSTOMER.CUSTOMER_POSTAL_ADDRESS, updatedCustomer.getCustomerPostalAddress())
                 .set(CUSTOMER.CUSTOMER_EMAIL, updatedCustomer.getCustomerEmail())
-                .set(CUSTOMER.CUSTOMER_CODE_MAIN, updatedCustomer.customerCodeMain)
+                .set(CUSTOMER.CUSTOMER_CODE_MAIN, updatedCustomer.getCustomerCodeMain())
                 .set(CUSTOMER.IS_ORGANIZATION, updatedCustomer.isOrganization())
                 .set(CUSTOMER.IS_PERSON, updatedCustomer.isPerson())
                 .where(CUSTOMER.CUSTOMER_CODE.eq(updatedCustomer.getCustomerCode()))

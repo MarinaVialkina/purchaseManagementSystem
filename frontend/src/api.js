@@ -19,13 +19,55 @@ export const getCustomerSimpleList = async () => {
 };
 
 export const createCustomer = async (customerData) => {
-    const response = await api.post('/customers', customerData);
-    return response.data;
+    try {
+        const response = await api.post('/customers', customerData);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            const errorData = error.response.data;
+
+            if (errorData.fieldErrors) {
+                const messages = errorData.fieldErrors
+                    .map(fieldError => `${fieldError.field}: ${fieldError.message}`)
+                    .join('\n');
+                throw new Error(messages);
+            } else if (errorData.message) {
+                throw new Error(errorData.message);
+            } else if (typeof errorData === 'string') {
+                throw new Error(errorData);
+            } else if (typeof errorData === 'object') {
+                const messages = Object.values(errorData).join('\n');
+                throw new Error(messages);
+            }
+        }
+        throw new Error('Ошибка сервера: ' + error.message);
+    }
 };
 
 export const updateCustomer = async (code, customerData) => {
-    const response = await api.put(`/customers/${code}`, customerData);
-    return response.data;
+    try {
+        const response = await api.put(`/customers/${code}`, customerData);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            const errorData = error.response.data;
+
+            if (errorData.fieldErrors) {
+                const messages = errorData.fieldErrors
+                    .map(fieldError => `${fieldError.field}: ${fieldError.message}`)
+                    .join('\n');
+                throw new Error(messages);
+            } else if (errorData.message) {
+                throw new Error(errorData.message);
+            } else if (typeof errorData === 'string') {
+                throw new Error(errorData);
+            } else if (typeof errorData === 'object') {
+                const messages = Object.values(errorData).join('\n');
+                throw new Error(messages);
+            }
+        }
+        throw new Error('Ошибка сервера: ' + error.message);
+    }
 };
 
 export const deleteCustomer = async (code) => {
@@ -39,8 +81,30 @@ export const getLots = async (params = {}) => {
 };
 
 export const createLot = async (lotData) => {
-    const response = await api.post('/lots', lotData);
-    return response.data;
+    try {
+        const response = await api.post('/lots', lotData);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            const errorData = error.response.data;
+
+            if (errorData.fieldErrors) {
+                const messages = errorData.fieldErrors
+                    .map(fieldError => `${fieldError.field}: ${fieldError.message}`)
+                    .join('\n');
+                throw new Error(messages);
+            } else if (errorData.message) {
+                throw new Error(errorData.message);
+            } else if (typeof errorData === 'string') {
+                throw new Error(errorData);
+            } else if (typeof errorData === 'object') {
+                const messages = Object.values(errorData).join('\n');
+                throw new Error(messages);
+            }
+        }
+        throw new Error('Ошибка сервера: ' + error.message);
+    }
+
 };
 
 export const updateLot = async (code, lotData) => {

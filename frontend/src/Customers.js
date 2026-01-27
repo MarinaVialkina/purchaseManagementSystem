@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 
-import { getCustomers, createCustomer, deleteCustomer, updateCustomer } from "./api";
+import { getCustomers, createCustomer, deleteCustomer, updateCustomer, getCustomerSimpleList } from "./api";
 
 function Customers() {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [customersSimple, setCustomersSimple] = useState([]);
+    const [loadingCustomersSimple, setLoadingCustomersSimple] = useState(false);
 
     const [newCustomer, setNewCustomer] = useState({
         customerCode: "",
@@ -41,6 +44,7 @@ function Customers() {
 
     useEffect(() => {
         loadCustomers();
+        loadCustomersSimple();
     }, []);
 
 
@@ -77,6 +81,18 @@ function Customers() {
         }
     };
 
+    const loadCustomersSimple = async () => {
+        setLoadingCustomersSimple(true);
+        try {
+            const data = await getCustomerSimpleList();
+            setCustomersSimple(data);
+        } catch (error) {
+            alert('Ошибка загрузки списка контрагентов');
+        } finally {
+            setLoadingCustomersSimple(false);
+        }
+    };
+
     const handleCreate = async () => {
         try {
             await createCustomer(newCustomer);
@@ -97,7 +113,7 @@ function Customers() {
 
             loadCustomers();
         } catch (error) {
-            alert('Ошибка создания контрагента: неверно введены данные.');
+            alert(`Ошибка создания контрагента:\n${error.message}`);
         }
     };
 
@@ -130,7 +146,7 @@ function Customers() {
             setEditingCustomer("");
             loadCustomers();
         } catch (error) {
-            alert("Ошибка обновления: " + error.message)
+            alert(`Ошибка обновления:\n${error.message}`);
         }
     }
 
@@ -157,7 +173,6 @@ function Customers() {
             const data = await getCustomers(cleanFilter);
             setCustomers(data.content || data);
         } catch (error) {
-            console.error('Ошибка загрузки:', error);
             alert('Ошибка загрузки данных');
         } finally {
             setLoading(false);
@@ -262,15 +277,23 @@ function Customers() {
                     style={{ marginRight: "10px", padding: "5px" }}
                 />
 
-                <input
-                    placeholder="Вышестоящий контрагент"
-                    value={newCustomer.customerCodeMain}
+                <select
+                    value={newCustomer.customerCodeMain || ""}
                     onChange={e => setNewCustomer({
                         ...newCustomer,
                         customerCodeMain: e.target.value
                     })}
-                    style={{ marginRight: "10px", padding: "5px" }}
-                />
+                    style={{ padding: "5px", minWidth: "200px" }}
+                    disabled={loadingCustomersSimple}
+                >
+                    <option value="">Вышестоящий контрагент</option>
+                    {customersSimple.map(customer => (
+                        <option key={customer.customerCode} value={customer.customerCode}>
+                            {customer.customerName} ({customer.customerCode})
+                        </option>
+                    ))}
+                </select>
+                {loadingCustomersSimple && <span style={{ marginLeft: "10px" }}>Загрузка...</span>}
 
                 <label style={{ marginRight: "10px" }}>
                     <input
@@ -391,15 +414,23 @@ function Customers() {
                                 style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
                             />
 
-                            <input
-                                placeholder="Вышестоящий контрагент"
-                                value={editingCustomer.customerCodeMain}
+                            <select
+                                value={editingCustomer.customerCodeMain || ""}
                                 onChange={e => setEditingCustomer({
                                     ...editingCustomer,
                                     customerCodeMain: e.target.value
                                 })}
-                                style={{ marginRight: "10px", padding: "5px" }}
-                            />
+                                style={{ padding: "5px", minWidth: "200px" }}
+                                disabled={loadingCustomersSimple}
+                            >
+                                <option value="">Вышестоящий контрагент</option>
+                                {customersSimple.map(customer => (
+                                    <option key={customer.customerCode} value={customer.customerCode}>
+                                        {customer.customerName} ({customer.customerCode})
+                                    </option>
+                                ))}
+                            </select>
+                            {loadingCustomersSimple && <span style={{ marginLeft: "10px" }}>Загрузка...</span>}
 
                             <label style={{ marginRight: "10px" }}>
                                 <input
@@ -491,7 +522,7 @@ function Customers() {
                         ...filter,
                         customerPostalAddress: e.target.value
                     })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+                    style={{ marginRight: "10px", padding: "5px", width: "200px" }}
                 />
 
                 <input
@@ -501,18 +532,29 @@ function Customers() {
                         ...filter,
                         customerEmail: e.target.value
                     })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+                    style={{ marginRight: "10px", padding: "5px", width: "200px" }}
                 />
 
-                <input
-                    placeholder="Фильтр по вышестоящему контрагенту"
-                    value={filter.customerCodeMain}
+                <select
+                    value={filter.customerCodeMain || ""}
                     onChange={e => setFilter({
                         ...filter,
                         customerCodeMain: e.target.value
                     })}
-                    style={{ marginRight: "10px", padding: "5px" }}
-                />
+                    style={{ padding: "5px", minWidth: "200px" }}
+                    disabled={loadingCustomersSimple}
+                >
+                    <option value="">Фильтр по вышестоящему контрагенту</option>
+                    {customersSimple.map(customer => (
+                        <option key={customer.customerCode} value={customer.customerCode}>
+                            {customer.customerName} ({customer.customerCode})
+                        </option>
+                    ))}
+                </select>
+                {loadingCustomersSimple && <span style={{ marginLeft: "10px" }}>Загрузка...</span>}
+
+
+                <div></div>
 
                 <label style={{ marginRight: "10px" }}>
                     <input

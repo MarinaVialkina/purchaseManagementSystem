@@ -11,7 +11,7 @@ public class CustomerDTO {
     public String customerName;
     @Pattern(regexp = "^\\d{10}$|^\\d{12}$", message = "ИНН должен содержать 10 или 12 цифр")
     public String customerInn;
-    @Pattern(regexp = "^\\d{9}$|", message = "ИНН должен содержать 9 цифр")
+    @Pattern(regexp = "^\\d{9}$|", message = "КПП должен содержать 9 цифр")
     public String customerKpp;
     public String customerLegalAddress;
     public String customerPostalAddress;
