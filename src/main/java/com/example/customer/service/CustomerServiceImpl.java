@@ -15,17 +15,22 @@ import java.util.List;
 
 
 @Service
-public class CustomerServiceImpl implements CustomerService{
+public class CustomerServiceImpl implements CustomerService {
     @Autowired
     CustomerRepository customerRepository;
 
     @Transactional
     @Override
     public CustomerDTO addCustomer(CustomerDTO newCustomer) {
+        String customerCodeMain = newCustomer.getCustomerCodeMain();
+        if (customerCodeMain != null && customerCodeMain.trim().isEmpty()) {
+            newCustomer.customerCodeMain = null;
+        }
+
         CustomerDTO existingCustomer = customerRepository.getRecord(newCustomer.getCustomerCode());
-        if (existingCustomer == null){
+        if (existingCustomer == null) {
             customerRepository.addRecord(newCustomer);
-        }else{
+        } else {
             throw new IllegalArgumentException("Customer с кодом " + newCustomer.getCustomerCode() + " уже существует");
         }
         return customerRepository.getRecord(newCustomer.getCustomerCode());
@@ -36,7 +41,7 @@ public class CustomerServiceImpl implements CustomerService{
     @Override
     public void deleteCustomer(String customerCode) {
         CustomerDTO deletedCustomer = customerRepository.getRecord(customerCode);
-        if (deletedCustomer == null){
+        if (deletedCustomer == null) {
             throw new IllegalArgumentException("Customer с кодом " + customerCode + " не найден");
         }
         customerRepository.deleteRecord(customerCode);
@@ -45,11 +50,16 @@ public class CustomerServiceImpl implements CustomerService{
     @Transactional
     @Override
     public CustomerDTO updateCustomer(String customerCode, CustomerDTO updatedCustomer) {
+        String customerCodeMain = updatedCustomer.getCustomerCodeMain();
+        if (customerCodeMain != null && customerCodeMain.trim().isEmpty()) {
+            updatedCustomer.customerCodeMain = null;
+        }
+
         CustomerDTO existingCustomer = customerRepository.getRecord(customerCode);
 
-        if (existingCustomer != null && customerCode.equals(updatedCustomer.getCustomerCode())){
+        if (existingCustomer != null && customerCode.equals(updatedCustomer.getCustomerCode())) {
             customerRepository.updateRecord(updatedCustomer);
-        }else {
+        } else {
             throw new IllegalArgumentException("Customer с кодом " + updatedCustomer.getCustomerCode() + " не найден");
         }
         return customerRepository.getRecord(updatedCustomer.getCustomerCode());

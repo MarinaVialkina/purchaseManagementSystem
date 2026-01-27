@@ -19,7 +19,7 @@ import java.util.List;
 import static com.example.jooq.tables.Lot.LOT;
 
 @Repository
-public class LotRepositoryImpl implements LotRepository{
+public class LotRepositoryImpl implements LotRepository {
     @Autowired
     private DSLContext dslContext;
 
@@ -59,7 +59,7 @@ public class LotRepositoryImpl implements LotRepository{
     @Override
     public LotDTO getRecord(String lotName) {
         LotRecord lotRecord = dslContext.selectFrom(LOT).where(LOT.LOT_NAME.eq(lotName)).fetchOne();
-        if (lotRecord == null){
+        if (lotRecord == null) {
             return null;
         }
 
@@ -76,31 +76,31 @@ public class LotRepositoryImpl implements LotRepository{
     public Page<LotDTO> getAllRecordWithFilter(LotFilterRequest lotFilterRequest, Pageable pageable) {
         Condition condition = DSL.noCondition();
 
-        if(lotFilterRequest.getLotName() != null && !lotFilterRequest.getLotName().isEmpty()){
-            condition = condition.and(LOT.LOT_NAME.likeIgnoreCase("%" + lotFilterRequest.getLotName() +"%"));
+        if (lotFilterRequest.getLotName() != null && !lotFilterRequest.getLotName().isEmpty()) {
+            condition = condition.and(LOT.LOT_NAME.likeIgnoreCase("%" + lotFilterRequest.getLotName() + "%"));
         }
-        if(lotFilterRequest.getCustomerCode() != null && !lotFilterRequest.getCustomerCode().isEmpty()){
+        if (lotFilterRequest.getCustomerCode() != null && !lotFilterRequest.getCustomerCode().isEmpty()) {
             condition = condition.and(LOT.CUSTOMER_CODE.eq(lotFilterRequest.getCustomerCode()));
         }
-        if(lotFilterRequest.getMinPrice() != null ){
+        if (lotFilterRequest.getMinPrice() != null) {
             condition = condition.and(LOT.PRICE.ge(lotFilterRequest.getMinPrice()));
         }
-        if(lotFilterRequest.getMaxPrice() != null ){
+        if (lotFilterRequest.getMaxPrice() != null) {
             condition = condition.and(LOT.PRICE.le(lotFilterRequest.getMaxPrice()));
         }
-        if(lotFilterRequest.getCurrencyCode() != null && !lotFilterRequest.getCurrencyCode().isEmpty()){
+        if (lotFilterRequest.getCurrencyCode() != null && !lotFilterRequest.getCurrencyCode().isEmpty()) {
             condition = condition.and(LOT.CURRENCY_CODE.eq(lotFilterRequest.getCurrencyCode()));
         }
-        if(lotFilterRequest.getNdsRate() != null && !lotFilterRequest.getNdsRate().isEmpty()){
+        if (lotFilterRequest.getNdsRate() != null && !lotFilterRequest.getNdsRate().isEmpty()) {
             condition = condition.and(LOT.NDS_RATE.eq(lotFilterRequest.getNdsRate()));
         }
-        if(lotFilterRequest.getPlaceDelivery() != null && !lotFilterRequest.getPlaceDelivery().isEmpty()){
+        if (lotFilterRequest.getPlaceDelivery() != null && !lotFilterRequest.getPlaceDelivery().isEmpty()) {
             condition = condition.and(LOT.PLACE_DELIVERY.likeIgnoreCase("%" + lotFilterRequest.getPlaceDelivery() + "%"));
         }
-        if(lotFilterRequest.getDateDeliveryFrom() != null){
+        if (lotFilterRequest.getDateDeliveryFrom() != null) {
             condition = condition.and(LOT.DATE_DELIVERY.ge(lotFilterRequest.getDateDeliveryFrom()));
         }
-        if(lotFilterRequest.getDateDeliveryTo() != null){
+        if (lotFilterRequest.getDateDeliveryTo() != null) {
             condition = condition.and(LOT.DATE_DELIVERY.le(lotFilterRequest.getDateDeliveryTo()));
         }
 
@@ -121,26 +121,26 @@ public class LotRepositoryImpl implements LotRepository{
         return new PageImpl<>(content, pageable, totalCountOfRecord);
     }
 
-    private SortField<?>[] getSortFields(Pageable pageable){
+    private SortField<?>[] getSortFields(Pageable pageable) {
         List<SortField<?>> sortFields = new ArrayList<>();
 
-        if(pageable.getSort() != null){
+        if (pageable.getSort() != null) {
             pageable.getSort().forEach(order -> {
                 Field<?> field = getField(order.getProperty());
-                if (field != null){
+                if (field != null) {
                     sortFields.add(order.isAscending() ? field.asc() : field.desc());
                 }
             });
         }
 
-        if (sortFields.isEmpty()){
+        if (sortFields.isEmpty()) {
             sortFields.add(LOT.LOT_NAME.asc());
         }
 
         return sortFields.toArray(new SortField<?>[0]);
     }
 
-    private Field<?> getField(String propertyName){
+    private Field<?> getField(String propertyName) {
         return switch (propertyName) {
             case "lotName" -> LOT.LOT_NAME;
             case "customerCode" -> LOT.CUSTOMER_CODE;
@@ -153,7 +153,7 @@ public class LotRepositoryImpl implements LotRepository{
         };
     }
 
-    private LotDTO mapToDTO(Record record){
+    private LotDTO mapToDTO(Record record) {
         return new LotDTO(record.get(LOT.LOT_NAME),
                 record.get(LOT.CUSTOMER_CODE),
                 record.get(LOT.PRICE),

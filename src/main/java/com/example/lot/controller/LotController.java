@@ -16,23 +16,23 @@ public class LotController {
     LotService lotService;
 
     @PostMapping
-    public LotDTO addLot(@RequestBody LotDTO newLot){
+    public LotDTO addLot(@RequestBody LotDTO newLot) {
         return lotService.addLot(newLot);
     }
 
     @DeleteMapping("/{lotName}")
-    public void deleteLot(@PathVariable String lotName){
+    public void deleteLot(@PathVariable String lotName) {
         lotService.deleteLot(lotName);
     }
 
     @PutMapping("/{lotName}")
-    public LotDTO updateLot(@PathVariable String lotName, @RequestBody LotDTO updatedLot){
+    public LotDTO updateLot(@PathVariable String lotName, @RequestBody LotDTO updatedLot) {
         return lotService.updateLot(lotName, updatedLot);
     }
 
     @GetMapping("")
     public Page<LotDTO> getListOfLots(
-            @ModelAttribute LotFilterRequest lotFilter, Pageable pageable){
+            @ModelAttribute LotFilterRequest lotFilter, Pageable pageable) {
         return lotService.getListOfLots(lotFilter, pageable);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.customer.dto.request;
 
 public class CustomerFilterRequest {
-    private String customerCode;
     private String customerName;
     private String customerInn;
     private String customerKpp;
@@ -12,13 +11,6 @@ public class CustomerFilterRequest {
     private Boolean isOrganization;
     private Boolean isPerson;
 
-    public String getCustomerCode() {
-        return customerCode;
-    }
-
-    public void setCustomerCode(String customerCode) {
-        this.customerCode = customerCode;
-    }
 
     public String getCustomerName() {
         return customerName;

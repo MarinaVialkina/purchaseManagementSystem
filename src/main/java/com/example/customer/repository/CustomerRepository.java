@@ -11,10 +11,14 @@ import java.util.List;
 
 public interface CustomerRepository {
     void addRecord(CustomerDTO newCustomer);
+
     void deleteRecord(String customer_code);
+
     void updateRecord(CustomerDTO updatedCustomer);
+
     CustomerDTO getRecord(String customer_code);
 
     Page<CustomerDTO> getAllRecordsWithFilter(CustomerFilterRequest filter, Pageable pageable);
+
     List<CustomerSimpleDTO> getRecordsSimpleList();
 }

@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 
 import { getCustomers, createCustomer, deleteCustomer, updateCustomer } from "./api";
 
-function Customers(){
+function Customers() {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -46,9 +46,9 @@ function Customers(){
 
 
 
-    const loadCustomers = async() => {
+    const loadCustomers = async () => {
         setLoading(true);
-        try{
+        try {
             const cleanFilter = {};
 
             if (filter.customerCode) cleanFilter.customerCode = filter.customerCode;
@@ -61,15 +61,15 @@ function Customers(){
             if (filter.customerCodeMain) cleanFilter.customerCodeMain = filter.customerCodeMain;
 
             if (filter.isOrganization !== undefined && filter.isOrganization !== false) {
-                cleanFilter.organization = filter.isOrganization; 
+                cleanFilter.organization = filter.isOrganization;
             }
             if (filter.isPerson !== undefined && filter.isPerson !== false) {
-                cleanFilter.person = filter.isPerson; 
+                cleanFilter.person = filter.isPerson;
             }
-            
+
             const data = await getCustomers(cleanFilter);
             setCustomers(data.content || data);
-        } catch(error) {
+        } catch (error) {
             console.error('Ошибка загрузки:', error);
             alert('Ошибка загрузки данных');
         } finally {
@@ -77,8 +77,8 @@ function Customers(){
         }
     };
 
-    const handleCreate = async() => {
-        try{
+    const handleCreate = async () => {
+        try {
             await createCustomer(newCustomer);
             alert('Контрагент создан');
 
@@ -96,25 +96,25 @@ function Customers(){
             })
 
             loadCustomers();
-        }catch(error){
+        } catch (error) {
             alert('Ошибка создания контрагента: неверно введены данные.');
         }
     };
 
-    const handleDelete = async(code) => {
-        if (window.confirm('Удалить контрагента?')){
-            try{
+    const handleDelete = async (code) => {
+        if (window.confirm('Удалить контрагента?')) {
+            try {
                 await deleteCustomer(code);
                 alert('Контрагент удалён');
                 loadCustomers();
-            }catch(error){
-                alert('Ошибка удаления контрагента '+error.message);
+            } catch (error) {
+                alert('Ошибка удаления контрагента ' + error.message);
             }
         }
     };
 
     const startEdit = (customer) => {
-        setEditingCustomer({...customer})
+        setEditingCustomer({ ...customer })
     }
 
     const cancelEdit = () => {
@@ -147,16 +147,16 @@ function Customers(){
             isOrganization: false,
             isPerson: false
         };
-        
+
         setFilter(resetFilter);
-        
+
         const cleanFilter = {};
-    
+
         try {
             setLoading(true);
-            const data = await getCustomers(cleanFilter); 
+            const data = await getCustomers(cleanFilter);
             setCustomers(data.content || data);
-        } catch(error) {
+        } catch (error) {
             console.error('Ошибка загрузки:', error);
             alert('Ошибка загрузки данных');
         } finally {
@@ -166,11 +166,11 @@ function Customers(){
 
     const sortCustomers = (key) => {
         let direction = 'asc';
-        
+
         if (sortConfig.key === key && sortConfig.direction === 'asc') {
             direction = 'desc';
         }
-        
+
         setSortConfig({ key, direction });
 
         const sortedCustomers = [...customers].sort((a, b) => {
@@ -182,429 +182,429 @@ function Customers(){
             }
             return 0;
         });
-        
+
         setCustomers(sortedCustomers);
     };
 
-    return(
+    return (
         <div>
             <h1>Контрагенты</h1>
-            <div style={{border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
-                    
-            <h3>Добавить контрагента</h3>
-            <input 
-                placeholder="Код контрагента"
-                value={newCustomer.customerCode}
-                onChange={e => setNewCustomer({
-                    ...newCustomer, 
-                    customerCode: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
+            <div style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
 
-            <input 
-                placeholder="Наименование"
-                value={newCustomer.customerName}
-                onChange={e => setNewCustomer({
-                    ...newCustomer, 
-                    customerName: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="ИНН"
-                value={newCustomer.customerInn}
-                onChange={e => setNewCustomer({
-                    ...newCustomer, 
-                    customerInn: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="КПП"
-                value={newCustomer.customerKpp}
-                onChange={e => setNewCustomer({
-                    ...newCustomer, 
-                    customerKpp: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Юр. адрес"
-                value={newCustomer.customerLegalAddress}
-                onChange={e => setNewCustomer({
-                    ...newCustomer, 
-                    customerLegalAddress: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Почтовый адрес"
-                value={newCustomer.customerPostalAddress}
-                onChange={e => setNewCustomer({
-                    ...newCustomer, 
-                    customerPostalAddress: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Электронная почта"
-                value={newCustomer.customerEmail}
-                onChange={e => setNewCustomer({
-                    ...newCustomer, 
-                    customerEmail: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Вышестоящий контрагент"
-                value={newCustomer.customerCodeMain}
-                onChange={e => setNewCustomer({
-                    ...newCustomer, 
-                    customerCodeMain: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <label style={{marginRight: "10px"}}>
-                <input 
-                    type="checkbox"
-                    checked={newCustomer.isOrganization}
+                <h3>Добавить контрагента</h3>
+                <input
+                    placeholder="Код контрагента"
+                    value={newCustomer.customerCode}
                     onChange={e => setNewCustomer({
-                        ...newCustomer, 
-                        isOrganization: e.target.checked,
-                        isPerson: e.target.checked ? false : newCustomer.isPerson
+                        ...newCustomer,
+                        customerCode: e.target.value
                     })}
-                    style={{marginRight: "5px"}}
+                    style={{ marginRight: "10px", padding: "5px" }}
                 />
-                Юр. лицо
-            </label>
 
-            <label style={{marginRight: "10px"}}>
-                <input 
-                    type="checkbox"
-                    checked={newCustomer.isPerson}
+                <input
+                    placeholder="Наименование"
+                    value={newCustomer.customerName}
                     onChange={e => setNewCustomer({
-                        ...newCustomer, 
+                        ...newCustomer,
+                        customerName: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="ИНН"
+                    value={newCustomer.customerInn}
+                    onChange={e => setNewCustomer({
+                        ...newCustomer,
+                        customerInn: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="КПП"
+                    value={newCustomer.customerKpp}
+                    onChange={e => setNewCustomer({
+                        ...newCustomer,
+                        customerKpp: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Юр. адрес"
+                    value={newCustomer.customerLegalAddress}
+                    onChange={e => setNewCustomer({
+                        ...newCustomer,
+                        customerLegalAddress: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Почтовый адрес"
+                    value={newCustomer.customerPostalAddress}
+                    onChange={e => setNewCustomer({
+                        ...newCustomer,
+                        customerPostalAddress: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Электронная почта"
+                    value={newCustomer.customerEmail}
+                    onChange={e => setNewCustomer({
+                        ...newCustomer,
+                        customerEmail: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Вышестоящий контрагент"
+                    value={newCustomer.customerCodeMain}
+                    onChange={e => setNewCustomer({
+                        ...newCustomer,
+                        customerCodeMain: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <label style={{ marginRight: "10px" }}>
+                    <input
+                        type="checkbox"
+                        checked={newCustomer.isOrganization}
+                        onChange={e => setNewCustomer({
+                            ...newCustomer,
+                            isOrganization: e.target.checked,
+                            isPerson: e.target.checked ? false : newCustomer.isPerson
+                        })}
+                        style={{ marginRight: "5px" }}
+                    />
+                    Юр. лицо
+                </label>
+
+                <label style={{ marginRight: "10px" }}>
+                    <input
+                        type="checkbox"
+                        checked={newCustomer.isPerson}
+                        onChange={e => setNewCustomer({
+                            ...newCustomer,
                             isPerson: e.target.checked,
                             isOrganization: e.target.checked ? false : newCustomer.isOrganization
-                    })}
-                    style={{marginRight: "5px"}}
-                />
+                        })}
+                        style={{ marginRight: "5px" }}
+                    />
                     Физ. лицо
-            </label>
-            <button onClick={handleCreate}>Добавить</button>
-        </div>
-        
+                </label>
+                <button onClick={handleCreate}>Добавить</button>
+            </div>
 
-        {editingCustomer && (
-            <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 1000
-            }}>
+
+            {editingCustomer && (
                 <div style={{
-                    backgroundColor: 'white',
-                    padding: '20px',
-                    borderRadius: '5px',
-                    minWidth: '400px',
-                    maxWidth: '600px'
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000
                 }}>
-                    <h3>Редактировать контрагента: {editingCustomer.customerCode}</h3>
-                    <div style={{marginBottom: '10px'}}>
-                        <input 
-                            placeholder="Код контрагента"
-                            value={editingCustomer.customerCode}
-                            disabled
-                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
-                        />
-                        
-                        <input 
-                            placeholder="Наименование"
-                            value={editingCustomer.customerName}
-                            onChange={e => setEditingCustomer({
-                                ...editingCustomer, 
-                                customerName: e.target.value
-                            })}
-                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
-                        />
-                        <input 
-                            placeholder="ИНН"
-                            value={editingCustomer.customerInn}
-                            onChange={e => setEditingCustomer({
-                                ...editingCustomer, 
-                                customerInn: e.target.value
-                            })}
-                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
-                        />
-
-                        <input 
-                            placeholder="КПП"
-                            value={editingCustomer.customerKpp}
-                            onChange={e => setEditingCustomer({
-                                ...editingCustomer, 
-                                customerKpp: e.target.value
-                            })}
-                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
-                        />
-
-                        <input 
-                            placeholder="Юр. адрес"
-                            value={editingCustomer.customerLegalAddress}
-                            onChange={e => setEditingCustomer({
-                                ...editingCustomer, 
-                                customerLegalAddress: e.target.value
-                            })}
-                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
-                        />
-
-                        <input 
-                            placeholder="Почтовый адрес"
-                            value={editingCustomer.customerPostalAddress}
-                            onChange={e => setEditingCustomer({
-                                ...editingCustomer, 
-                                customerPostalAddress: e.target.value
-                            })}
-                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
-                        />
-
-                        <input 
-                            placeholder="Электронная почта"
-                            value={editingCustomer.customerEmail}
-                            onChange={e => setEditingCustomer({
-                                ...editingCustomer, 
-                                customerEmail: e.target.value
-                            })}
-                            style={{marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px"}}
-                        />
-
-                        <input 
-                            placeholder="Вышестоящий контрагент"
-                            value={editingCustomer.customerCodeMain}
-                            onChange={e => setEditingCustomer({
-                                ...editingCustomer, 
-                                customerCodeMain: e.target.value
-                            })}
-                            style={{marginRight: "10px", padding: "5px"}}
-                        />
-
-                        <label style={{marginRight: "10px"}}>
-                            <input 
-                                type="checkbox"
-                                checked={editingCustomer.isOrganization}
-                                onChange={e => setEditingCustomer({
-                                    ...editingCustomer, 
-                                    isOrganization: e.target.checked,
-                                    isPerson: e.target.checked ? false : editingCustomer.isPerson
-                                })}
-                                style={{marginRight: "5px"}}
+                    <div style={{
+                        backgroundColor: 'white',
+                        padding: '20px',
+                        borderRadius: '5px',
+                        minWidth: '400px',
+                        maxWidth: '600px'
+                    }}>
+                        <h3>Редактировать контрагента: {editingCustomer.customerCode}</h3>
+                        <div style={{ marginBottom: '10px' }}>
+                            <input
+                                placeholder="Код контрагента"
+                                value={editingCustomer.customerCode}
+                                disabled
+                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
                             />
-                            Юр. лицо
-                        </label>
 
-                        <label style={{marginRight: "10px"}}>
-                            <input 
-                                type="checkbox"
-                                checked={editingCustomer.isPerson}
+                            <input
+                                placeholder="Наименование"
+                                value={editingCustomer.customerName}
                                 onChange={e => setEditingCustomer({
-                                    ...editingCustomer, 
+                                    ...editingCustomer,
+                                    customerName: e.target.value
+                                })}
+                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
+                            />
+                            <input
+                                placeholder="ИНН"
+                                value={editingCustomer.customerInn}
+                                onChange={e => setEditingCustomer({
+                                    ...editingCustomer,
+                                    customerInn: e.target.value
+                                })}
+                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
+                            />
+
+                            <input
+                                placeholder="КПП"
+                                value={editingCustomer.customerKpp}
+                                onChange={e => setEditingCustomer({
+                                    ...editingCustomer,
+                                    customerKpp: e.target.value
+                                })}
+                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
+                            />
+
+                            <input
+                                placeholder="Юр. адрес"
+                                value={editingCustomer.customerLegalAddress}
+                                onChange={e => setEditingCustomer({
+                                    ...editingCustomer,
+                                    customerLegalAddress: e.target.value
+                                })}
+                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
+                            />
+
+                            <input
+                                placeholder="Почтовый адрес"
+                                value={editingCustomer.customerPostalAddress}
+                                onChange={e => setEditingCustomer({
+                                    ...editingCustomer,
+                                    customerPostalAddress: e.target.value
+                                })}
+                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
+                            />
+
+                            <input
+                                placeholder="Электронная почта"
+                                value={editingCustomer.customerEmail}
+                                onChange={e => setEditingCustomer({
+                                    ...editingCustomer,
+                                    customerEmail: e.target.value
+                                })}
+                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
+                            />
+
+                            <input
+                                placeholder="Вышестоящий контрагент"
+                                value={editingCustomer.customerCodeMain}
+                                onChange={e => setEditingCustomer({
+                                    ...editingCustomer,
+                                    customerCodeMain: e.target.value
+                                })}
+                                style={{ marginRight: "10px", padding: "5px" }}
+                            />
+
+                            <label style={{ marginRight: "10px" }}>
+                                <input
+                                    type="checkbox"
+                                    checked={editingCustomer.isOrganization}
+                                    onChange={e => setEditingCustomer({
+                                        ...editingCustomer,
+                                        isOrganization: e.target.checked,
+                                        isPerson: e.target.checked ? false : editingCustomer.isPerson
+                                    })}
+                                    style={{ marginRight: "5px" }}
+                                />
+                                Юр. лицо
+                            </label>
+
+                            <label style={{ marginRight: "10px" }}>
+                                <input
+                                    type="checkbox"
+                                    checked={editingCustomer.isPerson}
+                                    onChange={e => setEditingCustomer({
+                                        ...editingCustomer,
                                         isPerson: e.target.checked,
                                         isOrganization: e.target.checked ? false : editingCustomer.isOrganization
-                                })}
-                                style={{marginRight: "5px"}}
-                            />
+                                    })}
+                                    style={{ marginRight: "5px" }}
+                                />
                                 Физ. лицо
-                        </label>
-                    
-                        <div style={{marginTop: '15px'}}>
-                            <button onClick={handleUpdate} style={{marginRight: '10px'}}>
-                                Сохранить
-                            </button>
-                            <button onClick={cancelEdit} style={{backgroundColor: '#ff6b6b', color: 'white'}}>
-                                Отмена
-                            </button>
+                            </label>
+
+                            <div style={{ marginTop: '15px' }}>
+                                <button onClick={handleUpdate} style={{ marginRight: '10px' }}>
+                                    Сохранить
+                                </button>
+                                <button onClick={cancelEdit} style={{ backgroundColor: '#ff6b6b', color: 'white' }}>
+                                    Отмена
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+            )}
+
+
+            <div style={{ marginBottom: "10px" }}>
+                <input
+                    placeholder="Фильтр по названию"
+                    value={filter.customerName}
+                    onChange={e => setFilter({
+                        ...filter,
+                        customerName: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Фильтр по ИНН"
+                    value={filter.customerInn}
+                    onChange={e => setFilter({
+                        ...filter,
+                        customerInn: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Фильтр по КПП"
+                    value={filter.customerKpp}
+                    onChange={e => setFilter({
+                        ...filter,
+                        customerKpp: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Фильтр по юр. адресу"
+                    value={filter.customerLegalAddress}
+                    onChange={e => setFilter({
+                        ...filter,
+                        customerLegalAddress: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Фильтр по почтовому адресу"
+                    value={filter.customerPostalAddress}
+                    onChange={e => setFilter({
+                        ...filter,
+                        customerPostalAddress: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Фильтр по электронной почте"
+                    value={filter.customerEmail}
+                    onChange={e => setFilter({
+                        ...filter,
+                        customerEmail: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <input
+                    placeholder="Фильтр по вышестоящему контрагенту"
+                    value={filter.customerCodeMain}
+                    onChange={e => setFilter({
+                        ...filter,
+                        customerCodeMain: e.target.value
+                    })}
+                    style={{ marginRight: "10px", padding: "5px" }}
+                />
+
+                <label style={{ marginRight: "10px" }}>
+                    <input
+                        type="checkbox"
+                        checked={filter.isOrganization === true}
+                        onChange={e => {
+                            const isChecked = e.target.checked;
+                            setFilter({
+                                ...filter,
+                                isOrganization: isChecked,
+                                isPerson: isChecked ? false : filter.isPerson
+                            })
+                        }}
+                        style={{ marginRight: "5px" }}
+                    />
+                    Юр. лицо
+                </label>
+
+                <label style={{ marginRight: "10px" }}>
+                    <input
+                        type="checkbox"
+                        checked={filter.isPerson === true}
+                        onChange={e => {
+                            const isChecked = e.target.checked;
+                            setFilter({
+                                ...filter,
+                                isPerson: isChecked,
+                                isOrganization: isChecked ? false : filter.isOrganization
+                            })
+                        }}
+                        style={{ marginRight: "5px" }}
+                    />
+                    Физ. лицо
+                </label>
+                <button onClick={loadCustomers}>Применить фильтр</button>
+                <button onClick={resetFilterHandler}>Сбросить фильтры</button>
             </div>
-        )}
-
-
-        <div style={{marginBottom: "10px"}}>
-            <input 
-                placeholder="Фильтр по названию"
-                value={filter.customerName}
-                onChange={e => setFilter({
-                    ...filter, 
-                    customerName: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            /> 
-
-            <input 
-                placeholder="Фильтр по ИНН"
-                value={filter.customerInn}
-                onChange={e => setFilter({
-                    ...filter, 
-                    customerInn: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Фильтр по КПП"
-                value={filter.customerKpp}
-                onChange={e => setFilter({
-                    ...filter, 
-                    customerKpp: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Фильтр по юр. адресу"
-                value={filter.customerLegalAddress}
-                onChange={e => setFilter({
-                    ...filter, 
-                    customerLegalAddress: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Фильтр по почтовому адресу"
-                value={filter.customerPostalAddress}
-                onChange={e => setFilter({
-                    ...filter, 
-                    customerPostalAddress: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Фильтр по электронной почте"
-                value={filter.customerEmail}
-                onChange={e => setFilter({
-                    ...filter, 
-                    customerEmail: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <input 
-                placeholder="Фильтр по вышестоящему контрагенту"
-                value={filter.customerCodeMain}
-                onChange={e => setFilter({
-                    ...filter, 
-                    customerCodeMain: e.target.value
-                })}
-                style={{marginRight: "10px", padding: "5px"}}
-            />
-
-            <label style={{marginRight: "10px"}}>
-                <input 
-                    type="checkbox"
-                    checked={filter.isOrganization === true}
-                    onChange={e => {
-                        const isChecked = e.target.checked;
-                        setFilter({
-                            ...filter, 
-                            isOrganization: isChecked,
-                            isPerson: isChecked ? false : filter.isPerson 
-                        })
-                    }}
-                    style={{marginRight: "5px"}}
-                />
-                Юр. лицо
-            </label>
-  
-            <label style={{marginRight: "10px"}}>
-                <input 
-                    type="checkbox"
-                    checked={filter.isPerson === true}
-                    onChange={e => {
-                        const isChecked = e.target.checked;
-                        setFilter({
-                            ...filter, 
-                            isPerson: isChecked,
-                            isOrganization: isChecked ? false : filter.isOrganization
-                        })
-                    }}
-                    style={{marginRight: "5px"}}
-                />
-                Физ. лицо
-            </label>
-            <button onClick={loadCustomers}>Применить фильтр</button> 
-            <button onClick={resetFilterHandler}>Сбросить фильтры</button>
-        </div>
 
 
 
 
-        {loading ? (
-            <p>Загрузка...</p>
-        ) : (
-            <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                    <tr>
-                        <th>Код</th>
-                        <th onClick={() => sortCustomers('customerName')} style={{cursor: 'pointer', padding: '10px'}}>
-                            Наименование 
-                            {sortConfig.key === 'customerName' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-                        </th>
-                        <th>ИНН</th>
-                        <th>КПП</th>
-                        <th>Юр. адрес</th>
-                        <th>Почтовый адрес</th>
-                        <th>Электронная почта</th>
-                        <th>Вышестоящий контрагент</th>
-                        <th>Юр. лицо/Физ. лицо</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {customers.length === 0 ? (
+            {loading ? (
+                <p>Загрузка...</p>
+            ) : (
+                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
                         <tr>
-                            <td colSpan={9} style={{textAlign: "center", padding: "20px"}}>
-                                Нет данных
-                            </td>
+                            <th>Код</th>
+                            <th onClick={() => sortCustomers('customerName')} style={{ cursor: 'pointer', padding: '10px' }}>
+                                Наименование
+                                {sortConfig.key === 'customerName' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
+                            </th>
+                            <th>ИНН</th>
+                            <th>КПП</th>
+                            <th>Юр. адрес</th>
+                            <th>Почтовый адрес</th>
+                            <th>Электронная почта</th>
+                            <th>Вышестоящий контрагент</th>
+                            <th>Юр. лицо/Физ. лицо</th>
                         </tr>
-                    ) : (
-                        customers.map(customer =>(
-                            <tr key={customer.customerCode}>
-                                <td style={{padding: "10px"}}>{customer.customerCode}</td>
-                                <td style={{padding: "10px"}}>{customer.customerName}</td>
-                                <td style={{padding: "10px"}}>{customer.customerInn || '-'}</td>
-                                <td style={{padding: "10px"}}>{customer.customerKpp || '-'}</td>
-                                <td style={{padding: "10px"}}>{customer.customerLegalAddress}</td>
-                                <td style={{padding: "10px"}}>{customer.customerPostalAddress}</td>
-                                <td style={{padding: "10px"}}>{customer.customerEmail}</td>
-                                <td style={{padding: "10px"}}>{customer.customerCodeMain || '-'}</td>
-                                <td style={{padding: "10px"}}>{customer.isOrganization ? 'Юр. лицо' : customer.isPerson ? 'Физ. лицо' : '-'}</td>
-                                <td style={{padding: "10px"}}>
-                                    <div><button onClick={() => handleDelete(customer.customerCode)}>Удалить</button></div>
-                                    <div><button onClick={() => startEdit(customer)}>Обновить</button></div>
+                    </thead>
+                    <tbody>
+                        {customers.length === 0 ? (
+                            <tr>
+                                <td colSpan={9} style={{ textAlign: "center", padding: "20px" }}>
+                                    Нет данных
                                 </td>
                             </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+                        ) : (
+                            customers.map(customer => (
+                                <tr key={customer.customerCode}>
+                                    <td style={{ padding: "10px" }}>{customer.customerCode}</td>
+                                    <td style={{ padding: "10px" }}>{customer.customerName}</td>
+                                    <td style={{ padding: "10px" }}>{customer.customerInn || '-'}</td>
+                                    <td style={{ padding: "10px" }}>{customer.customerKpp || '-'}</td>
+                                    <td style={{ padding: "10px" }}>{customer.customerLegalAddress}</td>
+                                    <td style={{ padding: "10px" }}>{customer.customerPostalAddress}</td>
+                                    <td style={{ padding: "10px" }}>{customer.customerEmail}</td>
+                                    <td style={{ padding: "10px" }}>{customer.customerCodeMain || '-'}</td>
+                                    <td style={{ padding: "10px" }}>{customer.isOrganization ? 'Юр. лицо' : customer.isPerson ? 'Физ. лицо' : '-'}</td>
+                                    <td style={{ padding: "10px" }}>
+                                        <div><button onClick={() => handleDelete(customer.customerCode)}>Удалить</button></div>
+                                        <div><button onClick={() => startEdit(customer)}>Обновить</button></div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
 
-        )}
-    </div>
+            )}
+        </div>
     );
 }
 export default Customers;

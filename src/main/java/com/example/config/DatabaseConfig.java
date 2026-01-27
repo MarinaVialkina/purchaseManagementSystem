@@ -1,6 +1,5 @@
 package com.example.config;
 
-import com.zaxxer.hikari.HikariConfig;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -13,9 +12,8 @@ import javax.sql.DataSource;
 public class DatabaseConfig {
 
     @Bean
-    public DSLContext dslContext(DataSource dataSource){
+    public DSLContext dslContext(DataSource dataSource) {
         return DSL.using(dataSource, SQLDialect.POSTGRES);
     }
-
 
 }

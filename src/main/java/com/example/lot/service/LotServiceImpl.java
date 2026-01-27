@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class LotServiceImpl implements LotService{
+public class LotServiceImpl implements LotService {
     @Autowired
     LotRepository lotRepository;
 
@@ -18,9 +18,9 @@ public class LotServiceImpl implements LotService{
     @Override
     public LotDTO addLot(LotDTO newLot) {
         LotDTO existingLot = lotRepository.getRecord(newLot.getLotName());
-        if (existingLot == null){
+        if (existingLot == null) {
             lotRepository.addRecord(newLot);
-        }else{
+        } else {
             throw new IllegalArgumentException("Lot с именем " + newLot.getLotName() + " уже существует");
         }
 
@@ -37,9 +37,9 @@ public class LotServiceImpl implements LotService{
     @Override
     public LotDTO updateLot(String lotName, LotDTO updatedLot) {
         LotDTO existingLot = lotRepository.getRecord(lotName);
-        if (existingLot != null && lotName.equals(updatedLot.getLotName())){
+        if (existingLot != null && lotName.equals(updatedLot.getLotName())) {
             lotRepository.updateRecord(updatedLot);
-        }else {
+        } else {
             throw new IllegalArgumentException("Lot с именем " + updatedLot.getLotName() + " не найден");
         }
 
