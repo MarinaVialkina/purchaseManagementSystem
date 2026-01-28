@@ -9,13 +9,23 @@ const api = axios.create({
 })
 
 export const getCustomers = async (params = {}) => {
-    const response = await api.get('/customers', { params });
-    return response.data;
+    try {
+        const response = await api.get('/customers', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка загрузки контрагентов:', error);
+        throw error.response?.data || error;
+    }
 };
 
 export const getCustomerSimpleList = async () => {
-    const response = await api.get('/customers/all');
-    return response.data;
+    try {
+        const response = await api.get('/customers/all');
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка загрузки простого списка контрагентов:', error);
+        throw error.response?.data || error;
+    }
 };
 
 export const createCustomer = async (customerData) => {
@@ -75,9 +85,15 @@ export const deleteCustomer = async (code) => {
 };
 
 
+
 export const getLots = async (params = {}) => {
-    const response = await api.get('/lots', { params });
-    return response.data;
+    try {
+        const response = await api.get('/lots', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка загрузки лотов:', error);
+        throw error.response?.data || error;
+    }
 };
 
 export const createLot = async (lotData) => {
@@ -104,7 +120,6 @@ export const createLot = async (lotData) => {
         }
         throw new Error('Ошибка сервера: ' + error.message);
     }
-
 };
 
 export const updateLot = async (code, lotData) => {

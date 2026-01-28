@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class LotDTO {
     @NotBlank(message = "Поле lotName не заполнено")
     public String lotName;
+    @NotBlank(message = "Поле customerCode не заполнено")
     public String customerCode;
     public BigDecimal price;
     public String currencyCode;

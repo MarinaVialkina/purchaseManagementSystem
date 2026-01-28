@@ -1,15 +1,121 @@
 import React, { useState, useEffect } from "react";
+import { Layout } from '@consta/uikit/Layout';
+import { Card } from '@consta/uikit/Card';
+import { Button } from '@consta/uikit/Button';
+import { Modal } from '@consta/uikit/Modal';
+import { Table } from '@consta/uikit/Table';
+import { Tag } from '@consta/uikit/Tag';
 
 import { getLots, createLot, deleteLot, updateLot, getCustomerSimpleList } from "./api";
 
 function Lots() {
-    const [lots, setLots] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const inputStyle = {
+    padding: '8px 12px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    fontSize: '14px',
+    width: '100%',
+    boxSizing: 'border-box'
+  };
 
-    const [customers, setCustomers] = useState([]);
-    const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const selectStyle = {
+    ...inputStyle,
+    minWidth: '200px'
+  };
 
-    const [newLot, setNewLot] = useState({
+  const labelStyle = {
+    display: 'block',
+    marginBottom: '5px',
+    fontWeight: 'bold',
+    fontSize: '14px'
+  };
+
+  const [lots, setLots] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [customersSimple, setCustomersSimple] = useState([]);
+  const [loadingCustomersSimple, setLoadingCustomersSimple] = useState(false);
+
+  const [newLot, setNewLot] = useState({
+    lotName: "",
+    customerCode: "",
+    price: "",
+    currencyCode: "RUB",
+    ndsRate: "Без НДС",
+    placeDelivery: "",
+    dateDelivery: ""
+  });
+
+  const [editingLot, setEditingLot] = useState(null);
+
+  const [filter, setFilter] = useState({
+    lotName: "",
+    customerCode: "",
+    minPrice: "",
+    maxPrice: "",
+    currencyCode: "",
+    ndsRate: "",
+    placeDelivery: "",
+    dateDeliveryFrom: "",
+    dateDeliveryTo: ""
+  });
+
+  const [sortConfig, setSortConfig] = useState({
+    key: 'lotName',
+    direction: 'asc'
+  });
+
+  const currencyOptions = ["RUB", "USD", "EUR"];
+  const ndsOptions = ["Без НДС", "18%", "20%"];
+
+  useEffect(() => {
+    loadLots();
+    loadCustomersSimple();
+  }, []);
+
+  const loadLots = async () => {
+    setLoading(true);
+    try {
+      const cleanFilter = {};
+
+      if (filter.lotName) cleanFilter.lotName = filter.lotName;
+      if (filter.customerCode) cleanFilter.customerCode = filter.customerCode;
+      if (filter.minPrice) cleanFilter.minPrice = filter.minPrice;
+      if (filter.maxPrice) cleanFilter.maxPrice = filter.maxPrice;
+      if (filter.currencyCode) cleanFilter.currencyCode = filter.currencyCode;
+      if (filter.ndsRate) cleanFilter.ndsRate = filter.ndsRate;
+      if (filter.placeDelivery) cleanFilter.placeDelivery = filter.placeDelivery;
+      if (filter.dateDeliveryTo) cleanFilter.dateDeliveryTo = filter.dateDeliveryTo;
+      if (filter.dateDeliveryFrom) cleanFilter.dateDeliveryFrom = filter.dateDeliveryFrom;
+
+
+
+      const data = await getLots(cleanFilter);
+      setLots(data.content || data);
+    } catch (error) {
+      alert('Ошибка загрузки данных');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCustomersSimple = async () => {
+    setLoadingCustomersSimple(true);
+    try {
+      const data = await getCustomerSimpleList();
+      setCustomersSimple(data);
+    } catch (error) {
+      alert(`Ошибка загрузки списка контрагентов: ${error.message || JSON.stringify(error)}`);
+    } finally {
+      setLoadingCustomersSimple(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    try {
+      await createLot(newLot);
+      alert('Лот успешно создан');
+      setNewLot({
         lotName: "",
         customerCode: "",
         price: "",
@@ -17,651 +123,615 @@ function Lots() {
         ndsRate: "Без НДС",
         placeDelivery: "",
         dateDelivery: ""
-    });
+      });
+      loadLots();
+    } catch (error) {
+      const errorMessage = error.message ||
+        (error.errors ? JSON.stringify(error.errors) :
+          (error.error || 'Неизвестная ошибка'));
+      alert(`Ошибка создания лота:\n${errorMessage}`);
+    }
+  };
 
-    const [editingLot, setEditingLot] = useState(null);
-
-    const [filter, setFilter] = useState({
-        lotName: "",
-        customerCode: "",
-        minPrice: "",
-        maxPrice: "",
-        currencyCode: "",
-        ndsRate: "",
-        placeDelivery: "",
-        dateDeliveryFrom: "",
-        dateDeliveryTo: ""
-    })
-
-    const [sortConfig, setSortConfig] = useState({
-        key: 'lotName',
-        direction: 'asc'
-    });
-
-    const currencyOptions = ["RUB", "USD", "EUR"];
-    const ndsOptions = ["Без НДС", "18%", "20%"]
-
-    useEffect(() => {
+  const handleDelete = async (lotName) => {
+    if (window.confirm('Вы уверены, что хотите удалить лот?')) {
+      try {
+        await deleteLot(lotName);
+        alert('Лот успешно удалён');
         loadLots();
-        loadCustomers();
-    }, []);
+      } catch (error) {
+        const errorMessage = error.message ||
+          (error.errors ? JSON.stringify(error.errors) :
+            (error.error || 'Неизвестная ошибка'));
+        alert(`Ошибка удаления лота: ${errorMessage}`);
+      }
+    }
+  };
 
-
-
-
-    const loadLots = async () => {
-        setLoading(true);
-        try {
-            const cleanFilter = {};
-
-            if (filter.lotName) cleanFilter.lotName = filter.lotName;
-            if (filter.customerCode) cleanFilter.customerCode = filter.customerCode;
-            if (filter.minPrice) cleanFilter.minPrice = filter.minPrice;
-            if (filter.maxPrice) cleanFilter.maxPrice = filter.maxPrice;
-            if (filter.currencyCode) cleanFilter.currencyCode = filter.currencyCode;
-            if (filter.ndsRate) cleanFilter.ndsRate = filter.ndsRate;
-            if (filter.placeDelivery) cleanFilter.placeDelivery = filter.placeDelivery;
-            if (filter.dateDeliveryTo) cleanFilter.dateDeliveryTo = filter.dateDeliveryTo;
-            if (filter.dateDeliveryFrom) cleanFilter.dateDeliveryFrom = filter.dateDeliveryFrom;
-
-
-
-            const data = await getLots(cleanFilter);
-            setLots(data.content || data);
-        } catch (error) {
-            console.error('Ошибка загрузки:', error);
-            alert('Ошибка загрузки данных');
-        } finally {
-            setLoading(false);
+  const startEdit = (lot) => {
+    let formattedDate = "";
+    if (lot.dateDelivery) {
+      try {
+        const date = new Date(lot.dateDelivery);
+        if (!isNaN(date.getTime())) {
+          formattedDate = date.toISOString().slice(0, 16);
         }
-    };
-
-    const loadCustomers = async () => {
-        setLoadingCustomers(true);
-        try {
-            const data = await getCustomerSimpleList();
-            setCustomers(data);
-        } catch (error) {
-            console.error('Ошибка загрузки контрагентов:', error);
-            alert('Ошибка загрузки списка контрагентов');
-        } finally {
-            setLoadingCustomers(false);
-        }
-    };
-
-    const handleCreate = async () => {
-        if (!newLot.lotName && !newLot.customerCode) {
-            alert('Необходимо заполнить обязательные поля: Наименование и Код контрагента');
-            return;
-        }
-        let formattedDate = newLot.dateDelivery;
-        if (formattedDate && !formattedDate.includes('T')) {
-            formattedDate = formattedDate + 'T00:00';
-        }
-
-        const lotData = {
-            ...newLot,
-            price: newLot.price ? parseFloat(newLot.price) : 0,
-            dateDelivery: formattedDate || null
-        };
-
-        try {
-            await createLot(lotData);
-            alert('Лот создан');
-
-            setNewLot({
-                lotName: "",
-                customerCode: "",
-                price: "",
-                currencyCode: "RUB",
-                ndsRate: "Без НДС",
-                placeDelivery: "",
-                dateDelivery: ""
-            })
-
-            loadLots();
-        } catch (error) {
-            alert(`Ошибка создания лота:\n${error.message} `);
-        }
-    };
-
-    const handleDelete = async (lotName) => {
-        if (window.confirm('Удалить лот?')) {
-            try {
-                await deleteLot(lotName);
-                alert('Лот удалён');
-                loadLots();
-            } catch (error) {
-                alert('Ошибка удаления лота ' + error.message);
-            }
-        }
-    };
-
-    const startEdit = (lot) => {
-        let formattedDate = "";
-        if (lot.dateDelivery) {
-            try {
-                const date = new Date(lot.dateDelivery);
-                if (!isNaN(date.getTime())) {
-                    formattedDate = date.toISOString().slice(0, 16);
-                }
-            } catch (e) {
-                console.error("Ошибка форматирования даты:", e);
-            }
-        }
-
-        setEditingLot({
-            ...lot,
-            dateDelivery: formattedDate,
-            price: lot.price ? lot.price.toString() : "0"
-        });
+      } catch (e) {
+        console.error("Ошибка форматирования даты:", e);
+      }
     }
 
-    const cancelEdit = () => {
-        setEditingLot(null)
+    setEditingLot({
+      ...lot,
+      dateDelivery: formattedDate,
+      price: lot.price ? lot.price.toString() : "0"
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingLot(null);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingLot) return;
+
+    try {
+      await updateLot(editingLot.lotName, editingLot);
+      alert('Лот успешно обновлён');
+      setEditingLot(null);
+      loadLots();
+    } catch (error) {
+      const errorMessage = error.message ||
+        (error.errors ? JSON.stringify(error.errors) :
+          (error.error || 'Неизвестная ошибка'));
+      alert(`Ошибка обновления лота:\n${errorMessage}`);
     }
+  };
 
-    const handleUpdate = async () => {
-        if (!editingLot) return;
-
-        if (!editingLot.customerCode) {
-            alert('Поле "Код контрагента" обязательно для заполнения');
-            return;
-        }
-
-        let formattedDate = editingLot.dateDelivery;
-        if (formattedDate && !formattedDate.includes('T')) {
-            formattedDate = formattedDate + 'T00:00';
-        } else if (formattedDate && formattedDate.length === 16) {
-            formattedDate = formattedDate + ':00';
-        }
-
-        const updateData = {
-            ...editingLot,
-            price: editingLot.price ? parseFloat(editingLot.price) : 0,
-            dateDelivery: formattedDate || null
-        };
-
-        console.log("Обновляемые данные:", updateData);
-
-        try {
-            await updateLot(editingLot.lotName, updateData);
-            alert('Лот обновлён.');
-            setEditingLot(null);
-            loadLots();
-        } catch (error) {
-            console.error("Ошибка обновления:", error);
-            alert("Ошибка обновления: " + (error.response?.data?.message || error.message));
-        }
-    }
-
-    const resetFilterHandler = async () => {
-        const resetFilter = {
-            lotName: "",
-            customerCode: "",
-            minPrice: "",
-            maxPrice: "",
-            currencyCode: "",
-            ndsRate: "",
-            placeDelivery: "",
-            dateDeliveryFrom: "",
-            dateDeliveryTo: ""
-        };
-
-        setFilter(resetFilter);
-
-        const cleanFilter = {};
-
-        try {
-            setLoading(true);
-            const data = await getLots(cleanFilter);
-            setLots(data.content || data);
-        } catch (error) {
-            console.error('Ошибка загрузки:', error);
-            alert('Ошибка загрузки данных');
-        } finally {
-            setLoading(false);
-        }
+  const resetFilterHandler = async () => {
+    const resetFilter = {
+      lotName: "",
+      customerCode: "",
+      minPrice: "",
+      maxPrice: "",
+      currencyCode: "",
+      ndsRate: "",
+      placeDelivery: "",
+      dateDeliveryFrom: "",
+      dateDeliveryTo: ""
     };
 
-    const sortLots = (key) => {
-        let direction = 'asc';
+    setFilter(resetFilter);
+    try {
+      setLoading(true);
+      const data = await getLots({});
+      setLots(data.content || data);
+    } catch (error) {
+      console.error('Ошибка загрузки:', error);
+      alert(`Ошибка загрузки данных: ${error.message || JSON.stringify(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
+  const sortLots = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
 
-        setSortConfig({ key, direction });
+    const sortedLots = [...lots].sort((a, b) => {
+      const aValue = a[key] || '';
+      const bValue = b[key] || '';
 
-        const sortedLots = [...lots].sort((a, b) => {
-            if (a[key] < b[key]) {
-                return direction === 'asc' ? -1 : 1;
-            }
-            if (a[key] > b[key]) {
-                return direction === 'asc' ? 1 : -1;
-            }
-            return 0;
-        });
 
-        setLots(sortedLots);
-    };
+      if (key === 'price') {
+        const aNum = parseFloat(aValue) || 0;
+        const bNum = parseFloat(bValue) || 0;
+        return direction === 'asc' ? aNum - bNum : bNum - aNum;
+      }
 
-    return (
-        <div>
-            <h1>Лоты</h1>
-            <div style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
+      if (key === 'dateDelivery') {
+        const aDate = aValue ? new Date(aValue).getTime() : 0;
+        const bDate = bValue ? new Date(bValue).getTime() : 0;
+        return direction === 'asc' ? aDate - bDate : bDate - aDate;
+      }
 
-                <h3>Добавить лот</h3>
 
+      if (aValue < bValue) {
+        return direction === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+    setLots(sortedLots);
+  };
+
+
+  const customerItems = customersSimple.map(customer => ({
+    label: `${customer.customerName} (${customer.customerCode})`,
+    value: customer.customerCode
+  }));
+
+  return (
+    <Layout direction="column" gap="m">
+      <h1>Лоты</h1>
+
+      <Card verticalSpace="m" horizontalSpace="m" form="round" shadow={false} border>
+
+        <h3>Добавить лот</h3>
+        <Layout direction="row" gap="m" wrap={true} style={{ marginBottom: '10px' }}>
+          <input
+            placeholder="Наименование *"
+            value={newLot.lotName}
+            onChange={(e) => setNewLot(prev => ({
+              ...prev,
+              lotName: e.target.value
+            }))}
+            style={inputStyle}
+            required
+          />
+          <select
+            value={newLot.customerCode}
+            onChange={(e) => setNewLot(prev => ({
+              ...prev,
+              customerCode: e.target.value
+            }))}
+            style={selectStyle}
+            disabled={loadingCustomersSimple}
+            required
+          >
+            <option value="">Выберите контрагента *</option>
+            {customersSimple.map(customer => (
+              <option key={customer.customerCode} value={customer.customerCode}>
+                {customer.customerName} ({customer.customerCode})
+              </option>
+            ))}
+          </select>
+        </Layout>
+
+        <Layout direction="row" gap="m" wrap={true} style={{ marginBottom: '10px' }}>
+          <input
+            placeholder="Начальная стоимость"
+            type="number"
+            min="0"
+            step="0.01"
+            value={newLot.price}
+            onChange={(e) => setNewLot(prev => ({
+              ...prev,
+              price: e.target.value
+            }))}
+            style={inputStyle}
+          />
+
+          <select
+            value={newLot.currencyCode}
+            onChange={(e) => setNewLot(prev => ({
+              ...prev,
+              currencyCode: e.target.value
+            }))}
+            style={selectStyle}
+          >
+            {currencyOptions.map(currency => (
+              <option key={currency} value={currency}>
+                {currency}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={newLot.ndsRate}
+            onChange={(e) => setNewLot(prev => ({
+              ...prev,
+              ndsRate: e.target.value
+            }))}
+            style={selectStyle}
+          >
+            {ndsOptions.map(nds => (
+              <option key={nds} value={nds}>
+                {nds}
+              </option>
+            ))}
+          </select>
+        </Layout>
+
+        <Layout direction="row" gap="m" wrap={true} style={{ marginBottom: '10px' }}>
+          <input
+            placeholder="Грузополучатель"
+            value={newLot.placeDelivery}
+            onChange={(e) => setNewLot(prev => ({
+              ...prev,
+              placeDelivery: e.target.value
+            }))}
+            style={inputStyle}
+          />
+
+          <input
+            type="datetime-local"
+            value={newLot.dateDelivery}
+            onChange={(e) => setNewLot(prev => ({
+              ...prev,
+              dateDelivery: e.target.value
+            }))}
+            style={inputStyle}
+          />
+        </Layout>
+
+        <Button
+          label="Добавить"
+          onClick={handleCreate}
+          size="m"
+          style={{ width: "200px" }}
+        />
+      </Card>
+
+
+
+      {editingLot && (
+        <Modal isOpen={!!editingLot} onClickOutside={cancelEdit} onEsc={cancelEdit}>
+          <Card verticalSpace="m" horizontalSpace="m" form="round">
+
+            <h3>Редактировать лот: {editingLot.lotName}</h3>
+            <Layout direction="column" gap="m">
+              <div>
+                <div style={labelStyle}>Наименование *</div>
                 <input
-                    placeholder="Наименование"
-                    value={newLot.lotName}
-                    onChange={e => setNewLot({
-                        ...newLot,
-                        lotName: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+                  placeholder="Наименование"
+                  value={editingLot.lotName}
+                  disabled
+                  style={{ ...inputStyle, backgroundColor: '#f5f5f5' }}
                 />
+              </div>
+
+              <div>
+                <div style={labelStyle}>Контрагент *</div>
                 <select
-                    value={newLot.customerCode}
-                    onChange={e => setNewLot({
-                        ...newLot,
-                        customerCode: e.target.value
-                    })}
-                    style={{ padding: "5px", minWidth: "200px" }}
-                    disabled={loadingCustomers}
+                  value={editingLot.customerCode}
+                  onChange={(e) => setEditingLot(prev => ({
+                    ...prev,
+                    customerCode: e.target.value
+                  }))}
+                  style={selectStyle}
+                  disabled={loadingCustomersSimple}
+                  required
                 >
-                    <option value="">Выберите контрагента</option>
-                    {customers.map(customer => (
-                        <option key={customer.customerCode} value={customer.customerCode}>
-                            {customer.customerName} ({customer.customerCode})
-                        </option>
-                    ))}
+                  <option value="">Выберите контрагента</option>
+                  {customersSimple.map(customer => (
+                    <option key={customer.customerCode} value={customer.customerCode}>
+                      {customer.customerName} ({customer.customerCode})
+                    </option>
+                  ))}
                 </select>
-                {loadingCustomers && <span style={{ marginLeft: "10px" }}>Загрузка...</span>}
+              </div>
 
+              <div>
+                <div style={labelStyle}>Начальная стоимость</div>
                 <input
-                    placeholder="Начальная стоимость"
-                    type="number"
-                    min="0"
-                    step="0.01"
-
-                    onChange={e => setNewLot({
-                        ...newLot,
-                        price: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+                  placeholder="Начальная стоимость"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={editingLot.price}
+                  onChange={(e) => setEditingLot(prev => ({
+                    ...prev,
+                    price: e.target.value
+                  }))}
+                  style={inputStyle}
                 />
+              </div>
 
+              <div>
+                <div style={labelStyle}>Валюта</div>
                 <select
-                    value={newLot.currencyCode}
-                    onChange={e => setNewLot({
-                        ...newLot,
-                        currencyCode: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+                  value={editingLot.currencyCode}
+                  onChange={(e) => setEditingLot(prev => ({
+                    ...prev,
+                    currencyCode: e.target.value
+                  }))}
+                  style={selectStyle}
                 >
-                    <option value="">Выберите валюту</option>
-                    {currencyOptions.map(currency => (
-                        <option key={currency} value={currency}>{currency}</option>
-                    ))}
+                  {currencyOptions.map(currency => (
+                    <option key={currency} value={currency}>
+                      {currency}
+                    </option>
+                  ))}
                 </select>
+              </div>
 
+              <div>
+                <div style={labelStyle}>Код НДС</div>
                 <select
-                    value={newLot.ndsRate}
-                    onChange={e => setNewLot({
-                        ...newLot,
-                        ndsRate: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+                  value={editingLot.ndsRate}
+                  onChange={(e) => setEditingLot(prev => ({
+                    ...prev,
+                    ndsRate: e.target.value
+                  }))}
+                  style={selectStyle}
                 >
-                    <option value="">Выберите код НДС</option>
-                    {ndsOptions.map(nds => (
-                        <option key={nds} value={nds}>{nds}</option>
-                    ))}
+                  {ndsOptions.map(nds => (
+                    <option key={nds} value={nds}>
+                      {nds}
+                    </option>
+                  ))}
                 </select>
+              </div>
 
+              <div>
+                <div style={labelStyle}>Грузополучатель</div>
                 <input
-                    placeholder="Грузополучатель"
-                    value={newLot.placeDelivery}
-                    onChange={e => setNewLot({
-                        ...newLot,
-                        placeDelivery: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+                  placeholder="Грузополучатель"
+                  value={editingLot.placeDelivery || ''}
+                  onChange={(e) => setEditingLot(prev => ({
+                    ...prev,
+                    placeDelivery: e.target.value
+                  }))}
+                  style={inputStyle}
                 />
+              </div>
 
+              <div>
+                <div style={labelStyle}>Дата доставки</div>
                 <input
-                    type="datetime-local"
-                    placeholder="Дата доставки"
-                    value={newLot.dateDelivery}
-                    onChange={e => setNewLot({
-                        ...newLot,
-                        dateDelivery: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+                  type="datetime-local"
+                  value={editingLot.dateDelivery}
+                  onChange={(e) => setEditingLot(prev => ({
+                    ...prev,
+                    dateDelivery: e.target.value
+                  }))}
+                  style={inputStyle}
                 />
+              </div>
+
+              <Layout direction="row" gap="m">
+                <Button label="Сохранить" onClick={handleUpdate} size="s" />
+                <Button label="Отмена" onClick={cancelEdit} size="s" view="secondary" />
+              </Layout>
+
+            </Layout>
+          </Card>
+        </Modal>
+      )}
 
 
-                <button onClick={handleCreate}>Добавить</button>
-            </div>
+      <Card verticalSpace="m" horizontalSpace="m" form="round" shadow={false} border>
+
+        <h3>Фильтры</h3>
+        <Layout direction="row" gap="m" wrap={true} style={{ marginBottom: '10px' }}>
+          <input
+            placeholder="Фильтр по названию"
+            value={filter.lotName}
+            onChange={(e) => setFilter(prev => ({ ...prev, lotName: e.target.value }))}
+            style={inputStyle}
+          />
+
+          <select
+            value={filter.customerCode || ""}
+            onChange={(e) => setFilter(prev => ({
+              ...prev,
+              customerCode: e.target.value
+            }))}
+            style={selectStyle}
+            disabled={loadingCustomersSimple}
+          >
+            <option value="">Все контрагенты</option>
+            {customersSimple.map(customer => (
+              <option key={customer.customerCode} value={customer.customerCode}>
+                {customer.customerName} ({customer.customerCode})
+              </option>
+            ))}
+          </select>
+
+          <input
+            placeholder="Мин. начальная стоимость"
+            type="number"
+            min="0"
+            step="0.01"
+            value={filter.minPrice}
+            onChange={(e) => setFilter(prev => ({ ...prev, minPrice: e.target.value }))}
+            style={inputStyle}
+          />
+        </Layout>
+
+        <Layout direction="row" gap="m" wrap={true} style={{ marginBottom: '10px' }}>
+          <input
+            placeholder="Макс. начальная стоимость"
+            type="number"
+            min="0"
+            step="0.01"
+            value={filter.maxPrice}
+            onChange={(e) => setFilter(prev => ({ ...prev, maxPrice: e.target.value }))}
+            style={inputStyle}
+          />
+
+          <select
+            value={filter.currencyCode || ""}
+            onChange={(e) => setFilter(prev => ({
+              ...prev,
+              currencyCode: e.target.value
+            }))}
+            style={selectStyle}
+          >
+            <option value="">Все валюты</option>
+            {currencyOptions.map(currency => (
+              <option key={currency} value={currency}>
+                {currency}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filter.ndsRate || ""}
+            onChange={(e) => setFilter(prev => ({
+              ...prev,
+              ndsRate: e.target.value
+            }))}
+            style={selectStyle}
+          >
+            <option value="">Все НДС</option>
+            {ndsOptions.map(nds => (
+              <option key={nds} value={nds}>
+                {nds}
+              </option>
+            ))}
+          </select>
+        </Layout>
+
+        <Layout direction="row" gap="m" wrap={true} style={{ marginBottom: '10px' }}>
+          <input
+            placeholder="Фильтр по грузополучателю"
+            value={filter.placeDelivery}
+            onChange={(e) => setFilter(prev => ({ ...prev, placeDelivery: e.target.value }))}
+            style={inputStyle}
+          />
+
+          <input
+            type="datetime-local"
+            placeholder="Дата доставки с"
+            value={filter.dateDeliveryFrom}
+            onChange={(e) => setFilter(prev => ({ ...prev, dateDeliveryFrom: e.target.value }))}
+            style={inputStyle}
+          />
+
+          <input
+            type="datetime-local"
+            placeholder="Дата доставки по"
+            value={filter.dateDeliveryTo}
+            onChange={(e) => setFilter(prev => ({ ...prev, dateDeliveryTo: e.target.value }))}
+            style={inputStyle}
+          />
+        </Layout>
+
+        <Layout direction="row" gap="m">
+          <Button label="Применить фильтры" onClick={loadLots} size="s" />
+          <Button label="Сбросить фильтры" onClick={resetFilterHandler} size="s" view="secondary" />
+        </Layout>
+
+      </Card>
 
 
-            {editingLot && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        backgroundColor: 'white',
-                        padding: '20px',
-                        borderRadius: '5px',
-                        minWidth: '400px',
-                        maxWidth: '600px'
-                    }}>
-                        <h3>Редактировать лот: {editingLot.lotName}</h3>
-                        <div style={{ marginBottom: '10px' }}>
-
-                            <input
-                                placeholder="Наименование"
-                                value={editingLot.lotName}
-                                disabled
-                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
-                            />
-                            <select
-                                value={editingLot.customerCode}
-                                onChange={e => setEditingLot({
-                                    ...editingLot,
-                                    customerCode: e.target.value
-                                })}
-                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "10px" }}
-                                disabled={loadingCustomers}
-                            >
-                                <option value="">Выберите контрагента</option>
-                                {customers.map(customer => (
-                                    <option key={customer.customerCode} value={customer.customerCode}>
-                                        {customer.customerName} ({customer.customerCode})
-                                    </option>
-                                ))}
-                            </select>
-
-                            <input
-                                placeholder="Начальная стоимость"
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={editingLot.price}
-                                onChange={e => setEditingLot({
-                                    ...editingLot,
-                                    price: e.target.value
-                                })}
-                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
-                            />
-
-                            <select
-                                value={editingLot.currencyCode}
-                                onChange={e => setEditingLot({
-                                    ...editingLot,
-                                    currencyCode: e.target.value
-                                })}
-                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
-                            >
-                                <option value="">Выберите валюту</option>
-                                {currencyOptions.map(currency => (
-                                    <option key={currency} value={currency}>{currency}</option>
-                                ))}
-                            </select>
-
-
-                            <select
-                                value={editingLot.ndsRate}
-                                onChange={e => setEditingLot({
-                                    ...editingLot,
-                                    ndsRate: e.target.value
-                                })}
-                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
-                            >
-                                <option value="">Выберите код НДС</option>
-                                {ndsOptions.map(nds => (
-                                    <option key={nds} value={nds}>{nds}</option>
-                                ))}
-                            </select>
-
-                            <input
-                                placeholder="Грузополучатель"
-                                value={editingLot.placeDelivery}
-                                onChange={e => setEditingLot({
-                                    ...editingLot,
-                                    placeDelivery: e.target.value
-                                })}
-                                style={{ marginRight: "10px", padding: "5px", width: "100%", marginBottom: "5px" }}
-                            />
-
-                            <input
-                                type="datetime-local"
-                                value={editingLot.dateDelivery}
-                                onChange={e => setEditingLot({
-                                    ...editingLot,
-                                    dateDelivery: e.target.value
-                                })}
-                                style={{ marginRight: "10px", padding: "5px" }}
-                            />
-
-
-
-                            <div style={{ marginTop: '15px' }}>
-                                <button onClick={handleUpdate} style={{ marginRight: '10px' }}>
-                                    Сохранить
-                                </button>
-                                <button onClick={cancelEdit} style={{ backgroundColor: '#ff6b6b', color: 'white' }}>
-                                    Отмена
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+      {loading ? (
+        <p>Загрузка...</p>
+      ) : (
+        <Table
+          rows={lots}
+          columns={[
+            {
+              title: (
+                <div style={{ cursor: 'pointer' }} onClick={() => sortLots('lotName')}>
+                  Наименование
+                  {sortConfig.key === 'lotName' && (
+                    <span style={{ marginLeft: 4 }}>
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
                 </div>
-            )}
-
-
-            <div style={{ marginBottom: "10px" }}>
-                <input
-                    placeholder="Фильтр по названию"
-                    value={filter.lotName}
-                    onChange={e => setFilter({
-                        ...filter,
-                        lotName: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+              ),
+              accessor: 'lotName',
+            },
+            {
+              title: 'Код контрагента',
+              accessor: 'customerCode',
+              renderCell: (row) => {
+                const customer = customersSimple.find(c => c.customerCode === row.customerCode);
+                return customer ? `${customer.customerName} (${customer.customerCode})` : row.customerCode || '-';
+              },
+            },
+            {
+              title: (
+                <div style={{ cursor: 'pointer' }} onClick={() => sortLots('price')}>
+                  Начальная стоимость
+                  {sortConfig.key === 'price' && (
+                    <span style={{ marginLeft: 4 }}>
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </div>
+              ),
+              accessor: 'price',
+              renderCell: (row) => row.price ? `${parseFloat(row.price).toFixed(2)}` : '0.00',
+            },
+            {
+              title: 'Валюта',
+              accessor: 'currencyCode',
+              renderCell: (row) => (
+                <Tag
+                  label={row.currencyCode || 'RUB'}
+                  mode={row.currencyCode === 'RUB' ? 'info' : row.currencyCode === 'USD' ? 'warning' : 'success'}
+                  size="s"
                 />
-
-                <select
-                    value={filter.customerCode}
-                    onChange={e => setFilter({
-                        ...filter,
-                        customerCode: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px", marginBottom: "5px" }}
-                    disabled={loadingCustomers}
-                >
-                    <option value="">Все контрагенты</option>
-                    {customers.map(customer => (
-                        <option key={customer.customerCode} value={customer.customerCode}>
-                            {customer.customerCode}
-                        </option>
-                    ))}
-                </select>
-
-                <input
-                    placeholder="Мин. начальная стоимость"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={filter.minPrice}
-                    onChange={e => setFilter({
-                        ...filter,
-                        minPrice: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
+              ),
+            },
+            {
+              title: 'Код НДС',
+              accessor: 'ndsRate',
+              renderCell: (row) => (
+                <Tag
+                  label={row.ndsRate || 'Без НДС'}
+                  mode={row.ndsRate === 'Без НДС' ? 'normal' : row.ndsRate === '18%' ? 'warning' : 'error'}
+                  size="s"
                 />
+              ),
+            },
+            {
+              title: 'Грузополучатель',
+              accessor: 'placeDelivery',
+              renderCell: (row) => row.placeDelivery || '-',
+            },
+            {
+              title: (
+                <div style={{ cursor: 'pointer' }} onClick={() => sortLots('dateDelivery')}>
+                  Дата доставки
+                  {sortConfig.key === 'dateDelivery' && (
+                    <span style={{ marginLeft: 4 }}>
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </div>
+              ),
+              accessor: 'dateDelivery',
+              renderCell: (row) => row.dateDelivery
+                ? new Date(row.dateDelivery).toLocaleString('ru-RU', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+                : '-',
+            },
+            {
+              title: 'Действия',
+              accessor: 'actions',
+              renderCell: (row) => (
 
-                <input
-                    placeholder="Макс. начальная стоимость"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={filter.maxPrice}
-                    onChange={e => setFilter({
-                        ...filter,
-                        maxPrice: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
-                />
+                <Layout direction="column" gap="xs">
+                  <Button
+                    label="Редактировать"
+                    onClick={() => startEdit(row)}
+                    size="s"
+                  />
+                  <Button
+                    label="Удалить"
+                    onClick={() => handleDelete(row.lotName)}
+                    size="s"
+                    view="warning"
+                  />
+                </Layout>
 
-                <select
-                    value={filter.currencyCode}
-                    onChange={e => setFilter({
-                        ...filter,
-                        currencyCode: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
-                >
-                    <option value="">Все валюты</option>
-                    {currencyOptions.map(currency => (
-                        <option key={currency} value={currency}>{currency}</option>
-                    ))}
-                </select>
-
-                <select
-                    value={filter.ndsRate}
-                    onChange={e => setFilter({
-                        ...filter,
-                        ndsRate: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
-                >
-                    <option value="">Все НДС</option>
-                    {ndsOptions.map(nds => (
-                        <option key={nds} value={nds}>{nds}</option>
-                    ))}
-                </select>
-
-                <input
-                    placeholder="Фильтр по грузополучателю"
-                    value={filter.placeDelivery}
-                    onChange={e => setFilter({
-                        ...filter,
-                        placeDelivery: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
-                />
-
-                <input
-                    placeholder="Дата доставки с"
-                    type="datetime-local"
-                    value={filter.dateDeliveryFrom}
-                    onChange={e => setFilter({
-                        ...filter,
-                        dateDeliveryFrom: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
-                />
-
-                <input
-                    placeholder="Дата доставки по"
-                    type="datetime-local"
-                    value={filter.dateDeliveryTo}
-                    onChange={e => setFilter({
-                        ...filter,
-                        dateDeliveryTo: e.target.value
-                    })}
-                    style={{ marginRight: "10px", padding: "5px" }}
-                />
-
-
-                <button onClick={loadLots}>Применить фильтр</button>
-                <button onClick={resetFilterHandler}>Сбросить фильтры</button>
-            </div>
-
-
-
-
-            {loading ? (
-                <p>Загрузка...</p>
-            ) : (
-                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr>
-                            <th onClick={() => sortLots('lotName')} style={{ cursor: 'pointer', padding: '10px' }}>
-                                Наименование
-                                {sortConfig.key === 'lotName' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-                            </th>
-                            <th>Код контрагента</th>
-                            <th onClick={() => sortLots('price')} style={{ cursor: 'pointer', padding: '10px' }}>
-                                Начальная стоимость
-                                {sortConfig.key === 'price' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-                            </th>
-                            <th>Валюта</th>
-                            <th>Код НДС</th>
-                            <th>Грузополучатель</th>
-                            <th onClick={() => sortLots('dateDelivery')} style={{ cursor: 'pointer', padding: '10px' }}>
-                                Дата доставки
-                                {sortConfig.key === 'dateDelivery' && (sortConfig.direction === 'asc' ? ' ↑' : ' ↓')}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {lots.length === 0 ? (
-                            <tr>
-                                <td colSpan={8} style={{ textAlign: "center", padding: "20px" }}>
-                                    Нет данных
-                                </td>
-                            </tr>
-                        ) : (
-                            lots.map(lot => {
-                                const customer = customers.find(c => c.customerCode === lot.customerCode);
-
-                                const customerDisplay = customer ?
-                                    `${customer.customerName} (${customer.customerCode})` :
-                                    lot.customerCode;
-
-                                return (<tr key={lot.lotName}>
-                                    <td style={{ padding: "10px" }}>{lot.lotName}</td>
-                                    <td style={{ padding: "10px" }}>{customerDisplay}</td>
-                                    <td style={{ padding: "10px" }}>{lot.price}</td>
-                                    <td style={{ padding: "10px" }}>{lot.currencyCode}</td>
-                                    <td style={{ padding: "10px" }}>{lot.ndsRate}</td>
-                                    <td style={{ padding: "10px" }}>{lot.placeDelivery}</td>
-                                    <td style={{ padding: "10px" }}>
-                                        {lot.dateDelivery
-                                            ? new Date(lot.dateDelivery).toLocaleString('ru-RU', {
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })
-                                            : '-'}
-                                    </td>
-                                    <td style={{ padding: "10px" }}>
-                                        <div><button onClick={() => handleDelete(lot.lotName)}>Удалить</button></div>
-                                        <div><button onClick={() => startEdit(lot)}>Обновить</button></div>
-                                    </td>
-                                </tr>)
-                            })
-                        )}
-                    </tbody>
-                </table>
-
-            )}
-        </div>
-    );
+              ),
+            },
+          ]}
+          getRowId={(row) => row.lotName || row.id}
+          size="s"
+          zebraStriped="odd"
+          emptyRowsPlaceholder={<div style={{ textAlign: 'center', padding: '20px' }}>Нет данных</div>}
+        />
+      )}
+    </Layout>
+  );
 }
+
 export default Lots;
